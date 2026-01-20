@@ -3,7 +3,6 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.urls import path, include
 from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
     TokenRefreshView,
     TokenVerifyView
 )
@@ -21,6 +20,7 @@ urlpatterns = [
     path('invoice/',include('apps.invoice.urls')),
     path('analytics/', include('apps.analytics.urls')),
     path('cost-category/', include('apps.cost_category.urls')),
+    path('cost/month/', include('apps.cost_month.urls')),
 
     #urls
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

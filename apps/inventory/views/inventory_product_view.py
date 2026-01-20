@@ -4,7 +4,7 @@ from apps.inventory.serializers.read import InventoryProductReadSerializer
 from apps.inventory.permission import  InventoryPermission
 from apps.inventory.filters import InventoryProductFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from apps.core.Pagination import  CursorPagination
+from apps.core.pagination import  CursorPagination
 from rest_framework.exceptions import ValidationError
 
 

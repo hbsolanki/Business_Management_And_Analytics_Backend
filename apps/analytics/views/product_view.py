@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from apps.product.models import Product
 from apps.inventory.models import InventoryProduct
-from apps.analytics.serializers.Product import (
+from apps.analytics.serializers.product import (
     ProductDetailsSerializer,
     ProductStockSerializer,
 )
