@@ -1,11 +1,57 @@
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.viewsets import ViewSet
+
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
+from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
-from apps.analytics.serializers.month_financial import MonthFinancialBreakdonwSerializer
+from rest_framework.response import Response
+from apps.analytics.filters import MonthlySummaryMonthYearFilter,MonthlySummaryCreatedAtRangeFilter
+from apps.analytics.serializers.month_financial import MonthFinancialBreakdownSerializer
+from apps.cost_month.models import MonthlyFinancialSummary
+from apps.user.permission import IsOwnerOrManager
 
-class MonthFinancialSummaryViewSet(ViewSet):
-    permission_classes = [IsAuthenticated]
+class MonthFinancialSummaryViewSet(GenericViewSet):
+    permission_classes = [IsOwnerOrManager]
+    filter_backends = [DjangoFilterBackend]
 
-    @action(detail=True, methods=['get'],url_path='breakdown')
-    def month_breakdown(self, request, pk=None):
-        pass
+    def get_serializer_class(self):
+        if self.action == "month_breakdown":
+            return MonthFinancialBreakdownSerializer
+
+        return None
+
+    def get_queryset(self):
+        return MonthlyFinancialSummary.objects.filter(
+            business=self.request.user.business
+        )
+
+    @action(detail=False, methods=["get"], url_path="breakdown")
+    def month_breakdown(self, request):
+        qs = self.get_queryset()
+
+        filtered_set = MonthlySummaryMonthYearFilter(request.GET, queryset=qs)
+        instance = filtered_set.qs.first()
+
+        if not instance:
+            return Response(
+                {"detail": "Data not found for given month and year"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="netprofit")
+    def month_net_profit(self, request):
+        queryset = self.get_queryset()
+        filter_instance = MonthlySummaryCreatedAtRangeFilter(request.GET, queryset=queryset)
+
+        # Access the filtered queryset via .qs
+        filtered_queryset = filter_instance.qs
+
+        if not filtered_queryset.exists():
+            return Response({"detail": "Data not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        result = filtered_queryset.values_list('net_profit_after_tax', flat=True)
+
+        return Response(list(result), status=status.HTTP_200_OK)
+

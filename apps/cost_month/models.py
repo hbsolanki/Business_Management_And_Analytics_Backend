@@ -36,7 +36,7 @@ class MonthlyFinancialSummary(BaseModel):
             models.Index(fields=["business", "year", "month"])
         ]
 
-class MonthlyProductPerformance(models.Model):
+class MonthlyProductPerformance(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True,blank=True)
     monthly_summary = models.ForeignKey(MonthlyFinancialSummary, on_delete=models.CASCADE,related_name="product_performance")
     quantity = models.PositiveIntegerField()

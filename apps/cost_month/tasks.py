@@ -42,14 +42,8 @@ def end_month_finance_update(month_summary_data:MonthlyFinancialSummary,business
 def daily_financial_summary_update(self):
     today = date.today()
     prev_date = today- timedelta(days=1)
-    end_month=False
-    if today.day == 1:
-        end_month=True
-        month = prev_date.month
-        year = prev_date.year
-    else:
-        month = today.month
-        year = today.year
+    month=prev_date.month
+    year=prev_date.year
 
 
     businesses = Business.objects.all()
@@ -63,15 +57,11 @@ def daily_financial_summary_update(self):
 
         revenue = 0
         products_total_cost = 0
-        # net_profit = 0
-        # gross_profit=0
-        # taxes = 0
         input_gst = 0
         output_gst = 0
         invoice_count=0
-        # product_performance=[]
-        invoices_prev_date=Invoice.objects.filter(business=business,created_at__date=prev_date)
-
+        invoices_prev_date=Invoice.objects.filter(business=business)
+        print(f"Created invoice at {prev_date} is ",invoices_prev_date)
         for invoice in invoices_prev_date:
             revenue += invoice.sub_total
             output_gst+=(invoice.total_amount-invoice.sub_total)
@@ -115,7 +105,7 @@ def daily_financial_summary_update(self):
             month_summary_data.output_gst+=output_gst
             month_summary_data.invoice_count+=invoice_count
             month_summary_data.save(update_fields=["revenue","products_total_cost","input_gst","output_gst","invoice_count"])
-            if end_month:
+            if today.day==1:
                 end_month_finance_update(month_summary_data,business)
 
 
