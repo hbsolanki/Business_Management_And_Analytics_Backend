@@ -2,7 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
-from apps.core.Pagination import CursorPagination
+from apps.core.pagination import CursorPagination
 from apps.inventory.permission import InventoryPermission
 from apps.inventory.models import Inventory
 from apps.inventory.serializers import read

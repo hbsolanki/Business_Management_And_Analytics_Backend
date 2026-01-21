@@ -1,10 +1,4 @@
 def calculate_tax_on_net_profit(net_profit: float) -> float:
-    """
-    Calculate income tax on net profit (individual / sole proprietor)
-    using NEW tax regime slabs (India).
-    Returns total tax including 4% cess.
-    """
-
     if net_profit <= 0:
         return 0.0
 

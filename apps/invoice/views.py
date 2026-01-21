@@ -6,7 +6,7 @@ from apps.invoice.services.invoice_service import create_invoice
 from apps.invoice.serializers import read,create
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.invoice.filters import InvoiceFilter
-from apps.core.Pagination import CursorPagination
+from apps.core.pagination import CursorPagination
 from apps.invoice.permission import InvoicePermission
 
 

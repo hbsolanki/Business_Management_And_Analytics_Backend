@@ -8,7 +8,7 @@ from apps.inventory.serializers import create, read
 from apps.inventory.services.inventory_transaction_service import create_inventory_transaction
 from apps.inventory.permission import InventoryPermission
 from apps.inventory.filters import InventoryTransactionFilter
-from apps.core.Pagination import CursorPagination
+from apps.core.pagination import CursorPagination
 
 
 class InventoryTransactionViewSet(viewsets.ModelViewSet):

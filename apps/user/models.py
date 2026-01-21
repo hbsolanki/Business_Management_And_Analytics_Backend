@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser,UserManager
 from apps.business_app.models import Business
 from apps.core.model import BaseModel
-from apps.core.ActiveUserManager import ActiveUserManager
+from apps.core.active_use_manager import ActiveUserManager
 
 class User(BaseModel,AbstractUser):
     objects = ActiveUserManager()

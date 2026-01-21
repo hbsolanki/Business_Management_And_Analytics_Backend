@@ -1,6 +1,6 @@
 from rest_framework import routers
 from apps.cost_category.views.cost_categoryviews import  CostCategoryViewSet
-from apps.cost_category.views.monthly_cost_view import MonthlyCostCategoryViewSet
+from apps.cost_category.views.cost_category_month import MonthlyCostCategoryViewSet
 
 router = routers.DefaultRouter()
 

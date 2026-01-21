@@ -7,7 +7,7 @@ from apps.product.models import Product
 from apps.product.serializers.product import ProductCreateSerializer, ProductUpdateSerializer, ProductReadSerializer
 from apps.product.permission import ProductPermission
 from apps.product.filters import ProductFilter
-from apps.core.Pagination import CursorPagination
+from apps.core.pagination import CursorPagination
 
 
 class ProductViewSet(ModelViewSet):
