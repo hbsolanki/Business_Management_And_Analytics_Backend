@@ -2,12 +2,12 @@ from rest_framework import viewsets
 
 from apps.cost_category.models import CostCategory
 from apps.cost_category.serializers.cost_category import CostCategorySerializer
-from rest_framework.permissions import IsAuthenticated
+from apps.user.permission import IsOwnerOrManager
 
 
 class CostCategoryViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsOwnerOrManager]
     serializer_class = CostCategorySerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return CostCategory.objects.filter(business=self.request.user.business)
