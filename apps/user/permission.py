@@ -25,9 +25,6 @@ class CanModifyUser(BasePermission):
     def has_object_permission(self, request, view, obj):
         user = request.user
 
-        if not user.is_authenticated:
-            return False
-
         if user.business_id != obj.business_id:
             return False
 

@@ -1,8 +1,7 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import action
+from apps.user.permission import IsOwnerOrManager
 from apps.cost_category.services.monthly_cost_category import monthly_cost_category_create
 from apps.cost_category.models import MonthlyCostCategory,MonthlyFinancialSummary
 from apps.cost_category.serializers.cost_category_month import MonthlyAllCostCategoryCreateSerializer,MonthlyCostCategoryUpdateSerializer,MonthlyCostCategoryReadSerializer
@@ -11,7 +10,7 @@ from datetime import datetime
 
 
 class MonthlyCostCategoryViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsOwnerOrManager]
 
     def get_month_summary(self):
         today = datetime.today()
