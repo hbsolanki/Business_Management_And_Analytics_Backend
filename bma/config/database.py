@@ -1,21 +1,21 @@
-from .base import env
+from bma.config import environment_variable
 
 # Database settings
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME"),
-        "USER": env("DB_USER"),
-        "PASSWORD": env("DB_PASS"),
-        "HOST": env("DB_HOST"),
-        "PORT":env("DB_PORT"),
+        "NAME": environment_variable.DB_NAME,
+        "USER":environment_variable.DB_USER,
+        "PASSWORD":environment_variable.DB_PASS,
+        "HOST": environment_variable.DB_HOST,
+        "PORT":environment_variable.DB_PORT,
     }
 }
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION":env.str("REDIS_URL"),
+        "LOCATION":environment_variable.REDIS_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }

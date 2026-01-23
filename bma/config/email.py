@@ -1,4 +1,4 @@
-from .base import env
+from bma.config import environment_variable
 
 #Email
 # EMAIL_BACKEND = env(
@@ -6,14 +6,11 @@ from .base import env
 #     default="django.core.mail.backends.console.EmailBackend",
 # )
 # SMTP config
-EMAIL_HOST = env("EMAIL_HOST", default=None)
-EMAIL_PORT = env.int("EMAIL_PORT", default=587)
-EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_HOST = environment_variable.EMAIL_HOST
+EMAIL_PORT = environment_variable.EMAIL_PORT
+EMAIL_USE_TLS = environment_variable.EMAIL_USE_TLS
 
-EMAIL_HOST_USER = env("EMAIL_HOST_USER", default=None)
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default=None)
+EMAIL_HOST_USER = environment_variable.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD =environment_variable.EMAIL_HOST_PASSWORD
 
-DEFAULT_FROM_EMAIL = env(
-    "DEFAULT_FROM_EMAIL",
-    default="Dev App <no-reply@localhost>",
-)
+DEFAULT_FROM_EMAIL = environment_variable.DEFAULT_FROM_EMAIL

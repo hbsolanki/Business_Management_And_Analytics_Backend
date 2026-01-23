@@ -1,6 +1,7 @@
 from pathlib import Path
 import environ
 import os
+from bma.config import environment_variable
 
 env = environ.Env(
     DEBUG=(bool, False)
@@ -11,9 +12,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY")
-DEBUG = env("DEBUG")
+SECRET_KEY =environment_variable.SECRET_KEY
+DEBUG =environment_variable.DEBUG
 ALLOWED_HOSTS = ['*']
+CORS_ALLOW_ALL_ORIGINS=environment_variable.CORS_ALLOW_ALL_ORIGINS
 
 # Application definition
 django_apps=[
@@ -25,7 +27,11 @@ django_apps=[
     "django.contrib.staticfiles",
     'rest_framework',
     'django_celery_beat',
-    'drf_spectacular'
+    'drf_spectacular',
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
 project_app=[
     'apps.user',
@@ -84,5 +90,37 @@ CSRF_TRUSTED_ORIGINS = [
 AUTH_USER_MODEL = "user.User"
 
 
-MEDIA_URL = env("MEDIA_URL")
+MEDIA_URL = environment_variable.MEDIA_URL
 MEDIA_ROOT = BASE_DIR / "media"
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+
+    "allauth.account.middleware.AccountMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+# Password validation
+# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+]
+
+GOOGLE_CLIENT_ID=environment_variable.GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET=environment_variable.GOOGLE_CLIENT_SECRET

@@ -3,10 +3,10 @@ from apps.core.model import BaseModel
 
 
 class Business(BaseModel):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100,null=True,blank=True)
     haveEquity = models.IntegerField(default=0, null=True, blank=True)
     assets = models.IntegerField(default=0, null=True, blank=True)
-    description = models.CharField(max_length=255)
+    description = models.CharField(max_length=255,null=True, blank=True)
 
 
     class Meta:

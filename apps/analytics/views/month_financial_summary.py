@@ -4,10 +4,12 @@ from rest_framework import status
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from apps.analytics.filters import MonthlySummaryMonthYearFilter,MonthlySummaryCreatedAtRangeFilter
+from apps.analytics.filters import MonthlySummaryMonthYearFilter
 from apps.analytics.serializers.month_financial import MonthFinancialBreakdownSerializer
+from apps.analytics.serializers.filter import MonthYearFilterSerializer
 from apps.cost_month.models import MonthlyFinancialSummary
 from apps.user.permission import IsOwnerOrManager
+from drf_spectacular.utils import extend_schema
 
 class MonthFinancialSummaryViewSet(GenericViewSet):
     permission_classes = [IsOwnerOrManager]
@@ -24,6 +26,11 @@ class MonthFinancialSummaryViewSet(GenericViewSet):
             business=self.request.user.business
         )
 
+    @extend_schema(
+        summary="Get Month Breakdown",
+        parameters=[MonthYearFilterSerializer],
+        responses={200: MonthFinancialBreakdownSerializer}
+    )
     @action(detail=False, methods=["get"], url_path="breakdown")
     def month_breakdown(self, request):
         qs = self.get_queryset()
@@ -43,7 +50,7 @@ class MonthFinancialSummaryViewSet(GenericViewSet):
     @action(detail=False, methods=["get"], url_path="netprofit")
     def month_net_profit(self, request):
         queryset = self.get_queryset()
-        filter_instance = MonthlySummaryCreatedAtRangeFilter(request.GET, queryset=queryset)
+        filter_instance = MonthlySummaryMonthYearFilter(request.GET, queryset=queryset)
 
         # Access the filtered queryset via .qs
         filtered_queryset = filter_instance.qs
