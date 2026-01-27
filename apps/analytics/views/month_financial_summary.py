@@ -26,11 +26,7 @@ class MonthFinancialSummaryViewSet(GenericViewSet):
             business=self.request.user.business
         )
 
-    @extend_schema(
-        summary="Get Month Breakdown",
-        parameters=[MonthYearFilterSerializer],
-        responses={200: MonthFinancialBreakdownSerializer}
-    )
+    @extend_schema(summary="Get Month Breakdown",parameters=[MonthYearFilterSerializer],responses={200: MonthFinancialBreakdownSerializer})
     @action(detail=False, methods=["get"], url_path="breakdown")
     def month_breakdown(self, request):
         qs = self.get_queryset()
@@ -52,7 +48,7 @@ class MonthFinancialSummaryViewSet(GenericViewSet):
         queryset = self.get_queryset()
         filter_instance = MonthlySummaryMonthYearFilter(request.GET, queryset=queryset)
 
-        # Access the filtered queryset via .qs
+        # Access the filtered queryset
         filtered_queryset = filter_instance.qs
 
         if not filtered_queryset.exists():

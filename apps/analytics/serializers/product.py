@@ -22,3 +22,9 @@ class ProductStockSerializer(serializers.ModelSerializer):
 class ProductSellingSerializer(serializers.ModelSerializer):
     pass
 
+
+class ProductPerformanceSerializer(serializers.Serializer):
+    total_quantity_sold = serializers.IntegerField()
+    total_revenue = serializers.DecimalField(max_digits=12, decimal_places=2)
+    total_profit = serializers.DecimalField(max_digits=12, decimal_places=2)
+    total_cost = serializers.DecimalField(max_digits=12, decimal_places=2)

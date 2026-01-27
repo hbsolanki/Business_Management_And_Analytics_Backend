@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import transaction
 from decimal import Decimal
 from rest_framework.exceptions import ValidationError
@@ -19,8 +21,7 @@ def create_invoice(
     gender,
     items,
     payment_mode,
-    user,
-):
+    user,):
     customer = Customer.objects.filter(
         mobile_number=mobile_number,
         business=user.business
@@ -121,8 +122,16 @@ def create_invoice(
             selling_price=final_selling_price,
         )
 
+
     invoice.sub_total = sub_total
     invoice.total_amount = total_amount
+    update_fields = ["sub_total", "total_amount"]
+    if payment_mode == "CASH":
+        invoice.payment_date = datetime.now()
+        update_fields += ["payment_date"]
+
+    invoice.save(update_fields=update_fields)
     invoice.save(update_fields=["sub_total", "total_amount"])
+
 
     return invoice
