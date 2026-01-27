@@ -17,6 +17,8 @@ class Invoice(BaseModel):
     payment_mode = models.CharField(choices=payment_type, max_length=6)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     sub_total = models.DecimalField(max_digits=12, decimal_places=2)
+    payment_date=models.DateTimeField( null=True, blank=True)
+    transaction_id=models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "bma_invoice"

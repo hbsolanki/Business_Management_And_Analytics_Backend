@@ -34,8 +34,8 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         data=serializer.validated_data
         invoice=create_invoice(**data,user=request.user)
-        # invoice_read_serializer=read.InvoiceReadSerializer(invoice)
+        invoice_read_serializer=read.InvoiceReadSerializer(invoice)
         # transaction.on_commit(lambda: send_invoice.delay(invoice.id))
-        return Response({"message":"invoice sended in your email"},status=status.HTTP_201_CREATED)
+        return Response(invoice_read_serializer.data,status=status.HTTP_201_CREATED)
 
 

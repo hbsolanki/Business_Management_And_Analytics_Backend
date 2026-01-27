@@ -3,10 +3,6 @@ import environ
 import os
 from bma.config import environment_variable
 
-env = environ.Env(
-    DEBUG=(bool, False)
-)
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
@@ -124,3 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 GOOGLE_CLIENT_ID=environment_variable.GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET=environment_variable.GOOGLE_CLIENT_SECRET
+
+STRIPE_SECRET_KEY=environment_variable.STRIPE_SECRET_KEY
+STRIPE_PUBLISHABLE_KEY=environment_variable.STRIPE_PUBLISHABLE_KEY
+STRIPE_WEBHOOK_SECRET=environment_variable.STRIPE_WEBHOOK_SECRET
