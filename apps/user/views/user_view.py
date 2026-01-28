@@ -21,11 +21,7 @@ class UserViewSet(ModelViewSet):
         return [IsAuthenticated()]
 
     def get_serializer_class(self):
-        if self.action == 'create_manager':
-            return create.ManagerCreateSerializer
-        elif self.action == 'create_employee':
-            return  create.EmployeeCreateSerializer
-        elif self.action == 'partial_update':
+        if self.action == 'partial_update':
             if self.request.user.role == User.Role.OWNER:
                 return update.OwnerUpdateSerializer
             return update.UserUpdateSerializer
@@ -52,65 +48,82 @@ class UserViewSet(ModelViewSet):
         except User.DoesNotExist:
             return Response({"error":"user not found"},status=status.HTTP_404_NOT_FOUND)
 
-
-    @action(detail=False, methods=['post'],url_path="manager/create",permission_classes=[IsOwner])
-    def create_manager(self,request):
-        serializer=self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        data = serializer.validated_data
-
-        manager = create_manager_employee(
-            **data,
-            business=request.user.business,
-            user=request.user,
-            role=User.Role.MANAGER
-        )
-
-        return Response({
-            "message":"manager create successfully",
-            "manager":{
-                "id":manager.id,
-                "username":manager.username,
-            }
-        })
-
-    @action(detail=False, methods=['post'],url_path="employee/create",permission_classes=[IsOwnerOrManager])
-    def create_employee(self,request):
-        serializer=self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data=serializer.validated_data
-        employee = create_manager_employee(
-            **data,
-            business=request.user.business,
-            user=request.user,
-            role=User.Role.EMPLOYEE
-        )
-
-        return Response({
-            "message":"employee create successfully",
-            "employee":{
-                "id":employee.id,
-                "username":employee.username,
-            }
-        })
-
-    @action(detail=False, methods=["GET"], url_path="manager", permission_classes=[IsOwner])
-    def manager_list(self, request):
-        manager = User.objects.filter(business=request.user.business, role=User.Role.MANAGER)
-        serializer = read.UserReadSerializer(manager, many=True)
-
-        return Response(serializer.data)
-
-    @action(detail=False, methods=["GET"], url_path="employee", permission_classes=[IsOwner])
-    def employee_list(self, request):
-        employees = User.objects.filter(business=request.user.business, role=User.Role.EMPLOYEE)
-        serializer = read.UserReadSerializer(employees, many=True)
-
-        return Response(serializer.data)
-
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+    @action(
+        detail=False,
+        methods=["GET", "POST"],
+        url_path="manager",
+        permission_classes=[IsOwner],
+    )
+    def manager(self, request):
+
+        if request.method == "GET":
+            managers = User.objects.filter(
+                business=request.user.business,
+                role=User.Role.MANAGER,
+            )
+            serializer = read.UserReadSerializer(managers, many=True)
+            return Response(serializer.data)
+
+        serializer = create.ManagerCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        manager = create_manager_employee(
+            **serializer.validated_data,
+            business=request.user.business,
+            user=request.user,
+            role=User.Role.MANAGER,
+        )
+
+        return Response(
+            {
+                "message": "Manager created successfully",
+                "manager": {
+                    "id": manager.id,
+                    "username": manager.username,
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(
+        detail=False,
+        methods=["GET", "POST"],
+        url_path="employee",
+        permission_classes=[IsOwnerOrManager],
+    )
+    def employee(self, request):
+
+        if request.method == "GET":
+            employees = User.objects.filter(
+                business=request.user.business,
+                role=User.Role.EMPLOYEE,
+            )
+            serializer = read.UserReadSerializer(employees, many=True)
+            return Response(serializer.data)
+
+        serializer = create.EmployeeCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        employee = create_manager_employee(
+            **serializer.validated_data,
+            business=request.user.business,
+            user=request.user,
+            role=User.Role.EMPLOYEE,
+        )
+
+        return Response(
+            {
+                "message": "Employee created successfully",
+                "employee": {
+                    "id": employee.id,
+                    "username": employee.username,
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )

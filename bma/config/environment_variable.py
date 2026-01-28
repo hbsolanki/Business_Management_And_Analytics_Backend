@@ -41,15 +41,18 @@ CELERY_TASK_TIME_LIMIT = env.int("CELERY_TASK_TIME_LIMIT", default=1800)
 REDIS_URL = env("REDIS_URL")
 
 # Email
-EMAIL_HOST = env("EMAIL_HOST", default=None)
-EMAIL_PORT = env.int("EMAIL_PORT", default=587)
-EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
-EMAIL_HOST_USER = env("EMAIL_HOST_USER", default=None)
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default=None)
-DEFAULT_FROM_EMAIL = env(
-    "DEFAULT_FROM_EMAIL",
-    default="Dev App <no-reply@localhost>",
-)
+# EMAIL_HOST = env("EMAIL_HOST", default=None)
+# EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+# EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+# EMAIL_HOST_USER = env("EMAIL_HOST_USER", default=None)
+# EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default=None)
+# DEFAULT_FROM_EMAIL = env(
+#     "DEFAULT_FROM_EMAIL",
+#     default="Dev App <no-reply@localhost>",
+# )
+DEFAULT_FROM_EMAIL=env("DEFAULT_FROM_EMAIL")
+DEFAULT_FROM_NAME_EMAIL=env("DEFAULT_FROM_NAME_EMAIL")
+BREVO_API_KEY=env("BREVO_API_KEY")
 
 # JWT (SimpleJWT expects timedelta)
 ACCESS_TOKEN_LIFETIME = timedelta(
