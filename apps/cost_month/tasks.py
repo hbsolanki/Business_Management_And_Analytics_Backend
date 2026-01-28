@@ -35,8 +35,6 @@ def end_month_finance_update(month_summary_data:MonthlyFinancialSummary,business
 
 
 
-
-
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=5, retry_kwargs={"max_retries": 3})
 @transaction.atomic
 def daily_financial_summary_update(self):
@@ -60,10 +58,9 @@ def daily_financial_summary_update(self):
         input_gst = 0
         output_gst = 0
         invoice_count=0
-        invoices_prev_date=Invoice.objects.filter(business=business)
-        print(f"Created invoice at {prev_date} is ",invoices_prev_date)
+        invoices_prev_date=Invoice.objects.filter(business=business,created_at__date=prev_date)
         for invoice in invoices_prev_date:
-            revenue += invoice.sub_total
+            revenue += invoice.total_amount
             output_gst+=(invoice.total_amount-invoice.sub_total)
             l1_input_gst = 0
             l1_product_total_cost = 0
@@ -73,7 +70,7 @@ def daily_financial_summary_update(self):
                 product_obj=product.product
                 quantity=product.quantity
                 cost=product_obj.cost_price*quantity
-                product_revenue = product.base_price * quantity
+                product_revenue = product.selling_price * quantity
                 l1_product_total_cost+=cost
                 l1_input_gst+=(quantity*((product.base_price*product_obj.input_gst_rate)/100))
 
@@ -87,7 +84,7 @@ def daily_financial_summary_update(self):
 
                     monthly_product_performance.save(update_fields=["quantity","cost","revenue"])
                 else:
-                    MonthlyProductPerformance.objects.create(monthly_summary=month_summary_data,product=product_obj,quantity=quantity,cost=cost,revenue=revenue)
+                    MonthlyProductPerformance.objects.create(monthly_summary=month_summary_data,product=product_obj,quantity=quantity,cost=cost,revenue=product_revenue)
 
 
             products_total_cost+=l1_product_total_cost

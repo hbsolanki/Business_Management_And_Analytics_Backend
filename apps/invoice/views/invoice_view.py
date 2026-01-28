@@ -35,7 +35,6 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         data=serializer.validated_data
         invoice=create_invoice(**data,user=request.user)
         invoice_read_serializer=read.InvoiceReadSerializer(invoice)
-        # transaction.on_commit(lambda: send_invoice.delay(invoice.id))
         return Response(invoice_read_serializer.data,status=status.HTTP_201_CREATED)
 
 

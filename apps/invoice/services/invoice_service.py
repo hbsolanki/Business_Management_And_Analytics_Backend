@@ -8,7 +8,7 @@ from apps.customer.models import Customer
 from apps.invoice.models import Invoice, ProductInvoice
 from apps.product.models import Product
 from apps.inventory.models import InventoryProduct
-
+from apps.invoice.tasks import send_invoice_email
 
 @transaction.atomic
 def create_invoice(
@@ -129,6 +129,7 @@ def create_invoice(
     if payment_mode == "CASH":
         invoice.payment_date = datetime.now()
         update_fields += ["payment_date"]
+        send_invoice_email.delay(to_email=invoice.customer.email, invoice_id=invoice.id)
 
     invoice.save(update_fields=update_fields)
     invoice.save(update_fields=["sub_total", "total_amount"])

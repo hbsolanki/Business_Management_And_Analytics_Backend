@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from apps.invoice.models import Invoice
 from datetime import datetime
 from apps.invoice.permission import InvoicePermission
+from apps.invoice.tasks import send_invoice_email
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -63,7 +64,7 @@ class PaymentViewSet(viewsets.ViewSet):
                 invoice.transaction_id = event['data']['object']['id']
                 invoice.payment_date = datetime.now()
                 invoice.save(update_fields=['payment_date', 'payment_mode', 'transaction_id'])
-                print(event["data"]["object"])
+                send_invoice_email.delay(to_email=invoice.customer.email, invoice_id=invoice.id)
             except Invoice.DoesNotExist:
                 pass
 

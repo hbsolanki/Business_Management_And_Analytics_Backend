@@ -3,8 +3,10 @@ from rest_framework.routers import DefaultRouter
 from apps.user.views.auth_view import LoginView
 from apps.user.views.user_view import  UserViewSet
 from apps.user.views.google_auth import GoogleOAuthLoginAPIView
+from apps.user.views.forget_view import ForgetViewSet
 
 router = DefaultRouter()
+router.register('forget',ForgetViewSet,basename='forget')
 router.register(r'', UserViewSet, basename='user')
 
 urlpatterns = [
