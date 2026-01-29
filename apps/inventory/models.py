@@ -14,8 +14,8 @@ class Inventory(models.Model):
 
 
 class InventoryProduct(BaseModel):
-    inventory=models.ForeignKey(to=Inventory, on_delete=models.CASCADE,related_name="inventory_products")
-    product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
+    inventory=models.ForeignKey(to=Inventory, on_delete=models.CASCADE,related_name="inventory_product_item")
+    product = models.ForeignKey(to=Product, on_delete=models.CASCADE,related_name="inventory_product")
     stock_quantity = models.IntegerField(validators=[MinValueValidator(0)])
 
     class Meta:
