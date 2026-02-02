@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from apps.business_app.models import Business
 from apps.user.serializers.base import BaseUserSerializer
-
+from apps.user.models import User
 
 class BusinessCreateSerializer(BaseUserSerializer):
     name = serializers.CharField(required=True)
@@ -38,3 +38,8 @@ class UpdateBusinessSerializer(serializers.ModelSerializer):
         fields = ['name','assets','haveEquity','description']
 
 
+class BusinessUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields=["id","username","profile_picture","first_name","last_name","email","mobile_number","role"]
