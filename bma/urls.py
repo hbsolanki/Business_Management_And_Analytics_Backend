@@ -21,6 +21,7 @@ urlpatterns = [
     path('analytics/', include('apps.analytics.urls')),
     path('cost-category/', include('apps.cost_category.urls')),
     path('cost/month/', include('apps.cost_month.urls')),
+    path('task/', include('apps.task.urls')),
 
     #urls
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
