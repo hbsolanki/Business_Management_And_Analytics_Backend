@@ -1,5 +1,8 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
+
+from apps.user.filters import UserFilter
 from apps.user.permission import IsOwner,IsOwnerOrManager,CanModifyUser,CanDeleteUser
 from rest_framework.permissions import IsAuthenticated
 from apps.user.services.user_service import  create_user,create_manager_employee
@@ -9,9 +12,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.cache import cache
 import random
+from apps.core.pagination import CursorPagination
+from apps.business_app.serializers import BusinessUserSerializer
 
 
 class UserViewSet(ModelViewSet):
+    pagination_class = CursorPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserFilter
 
     def get_permissions(self):
         if self.action in ["update", "partial_update"]:
@@ -127,3 +135,15 @@ class UserViewSet(ModelViewSet):
             },
             status=status.HTTP_201_CREATED,
         )
+
+    @action(detail=False, methods=["GET"],permission_classes=[IsAuthenticated])
+    def search(self, request):
+        queryset = User.objects.filter(business=request.user.business,is_active=True)
+        queryset = self.filter_queryset(queryset)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = BusinessUserSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = BusinessUserSerializer(queryset, many=True)
+        return Response(serializer.data)

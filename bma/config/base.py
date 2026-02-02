@@ -28,6 +28,7 @@ django_apps=[
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+    'channels'
 ]
 project_app=[
     'apps.user',
@@ -39,6 +40,7 @@ project_app=[
     'apps.analytics',
     'apps.cost_category',
     'apps.cost_month',
+    'apps.chat'
 ]
 INSTALLED_APPS = django_apps + project_app
 
@@ -61,6 +63,7 @@ TEMPLATES = [
 ROOT_URLCONF = "bma.urls"
 
 WSGI_APPLICATION = "bma.wsgi.application"
+ASGI_APPLICATION = "bma.asgi.application"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

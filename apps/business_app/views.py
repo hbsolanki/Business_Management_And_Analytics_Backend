@@ -3,10 +3,11 @@ from logging import raiseExceptions
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import action
 from apps.user.services.user_service import get_tokens_for_user, create_user
 from apps.user.models import User
-from apps.business_app.serializers import BusinessReadSerializer, BusinessCreateSerializer, OnwerBusinessReadSerializer
+from apps.business_app.serializers import BusinessReadSerializer, BusinessCreateSerializer, OnwerBusinessReadSerializer,BusinessUserSerializer
 from apps.business_app.models import Business
 from apps.user.permission import IsOwner
 from django.db import  transaction
@@ -18,6 +19,8 @@ class BusinessViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == "create":
             return BusinessCreateSerializer
+        elif self.action == "business_users":
+            return BusinessUserSerializer
         if self.request.user.role==User.Role.OWNER:
             return OnwerBusinessReadSerializer
         return BusinessReadSerializer
@@ -28,7 +31,8 @@ class BusinessViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action == "create":
             return [AllowAny()]
-
+        if self.action == "business_users":
+            return [IsAuthenticated()]
         return [IsOwner()]
 
     @transaction.atomic
@@ -64,3 +68,16 @@ class BusinessViewSet(ModelViewSet):
 
         except Exception as e:
             return Response({"error","something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=["get"], url_path="users")
+    def business_users(self, request, pk=None):
+        try:
+            users = User.objects.filter(business=request.user.business)
+
+            serializer = self.get_serializer(users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception:
+            return Response({"error": "Business not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+
