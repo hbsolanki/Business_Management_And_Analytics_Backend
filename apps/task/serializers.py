@@ -22,7 +22,7 @@ class TaskReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields=["id","business","assignee","assigned_by","status","title","description","remarks","completed_at"]
+        fields=["id","business","assignee","assigned_by","status","title","description","remarks","completed_at","created_at"]
 
 class TaskUpdateSerializer(serializers.ModelSerializer):
 
