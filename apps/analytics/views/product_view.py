@@ -8,10 +8,10 @@ from apps.analytics.serializers.product import ProductDetailsSerializer,ProductS
 from apps.analytics.serializers.filter import ProductPerformanceFilterSerializer
 from apps.cost_month.models import MonthlyProductPerformance
 from django_filters.rest_framework import DjangoFilterBackend
-from apps.analytics.filters import ProductPerformanceMonthYearFilter,ProductPerformanceFilter
+from apps.analytics.filters import ProductPerformanceMonthYearFilter,ProductPerformanceFilter,MonthlySummaryCreatedAtRangeFilter
 from django.db.models import Sum,F
 from apps.user.permission import IsOwnerOrManager
-from apps.invoice.models import Invoice
+from apps.invoice.models import Invoice,ProductInvoice
 from drf_spectacular.utils import extend_schema
 
 class AnalysisProductViewSet(GenericViewSet):
@@ -42,7 +42,7 @@ class AnalysisProductViewSet(GenericViewSet):
         serializer = ProductStockSerializer(inventoryData, many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-    @extend_schema(summary="Get Month Breakdown",parameters=[ProductPerformanceFilterSerializer],responses={200: ProductPerformanceSerializer})
+    @extend_schema(summary="Get Product Performance",parameters=[ProductPerformanceFilterSerializer],responses={200: ProductPerformanceSerializer})
     @action(detail=False, methods=["get"], url_path="performance")
     def product_performance(self, request):
         qs = Invoice.objects.filter(business=request.user.business)
@@ -62,4 +62,59 @@ class AnalysisProductViewSet(GenericViewSet):
         serializer = ProductPerformanceSerializer(data)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=["get"], url_path="performance/report")
+    def product_performance_report(self, request):
+
+        invoice_qs = Invoice.objects.filter(
+            business=request.user.business
+        )
+
+        filterset = MonthlySummaryCreatedAtRangeFilter(
+            request.GET,
+            queryset=invoice_qs
+        )
+
+        if not filterset.is_valid():
+            return Response(filterset.errors, status=400)
+
+        if not filterset.qs.exists():
+            return Response({"error": "Data not found"}, status=400)
+
+        items_qs = ProductInvoice.objects.filter(
+            invoice__in=filterset.qs
+        )
+
+        product_wise = (
+            items_qs
+            .annotate(
+                product_name=F("product__name"),
+                category_name=F("product__product_category__name"),
+            )
+            .values(
+                "product_id",
+                "product_name",
+                "category_name",
+            )
+            .annotate(
+                total_quantity_sold=Sum("quantity"),
+                total_revenue=Sum(F("quantity") * F("selling_price")),
+                total_profit=Sum(F("quantity") * F("product__net_profit")),
+                total_cost=Sum(F("quantity") * F("product__cost_price")),
+            )
+        )
+
+        summary = items_qs.aggregate(
+            total_quantity_sold=Sum("quantity"),
+            total_revenue=Sum(F("quantity") * F("selling_price")),
+            total_profit=Sum(F("quantity") * F("product__net_profit")),
+            total_cost=Sum(F("quantity") * F("product__cost_price")),
+        )
+
+        return Response(
+            {
+                "summary": summary,
+                "products": product_wise,
+            },
+            status=status.HTTP_200_OK
+        )
 
