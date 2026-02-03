@@ -23,6 +23,7 @@ urlpatterns = [
     path('cost/month/', include('apps.cost_month.urls')),
     path('chat/',include('apps.chat.urls')),
     path('task/',include('apps.task.urls')),
+    path('notification/',include('apps.notification.urls')),
 
     #urls
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

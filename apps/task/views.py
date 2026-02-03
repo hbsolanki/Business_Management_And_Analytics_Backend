@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.task.filters import TaskFilter
+from apps.task.services import send_notification
 
 class TaskViewSet(viewsets.ModelViewSet):
     http_method_names=['get','post','patch','delete']
@@ -36,6 +37,9 @@ class TaskViewSet(viewsets.ModelViewSet):
         data=serializer.validated_data
         assignee=User.objects.filter(id=data["assignee_id"]).first()
         task=Task.objects.create(business=request.user.business,assignee=assignee,assigned_by=request.user,title=data["title"],description=data["description"])
+
+        #notification
+        send_notification(task,request)
 
         return Response({"assignee":assignee.username,"task_id":task.id},status=status.HTTP_201_CREATED)
 

@@ -1,7 +1,7 @@
 # apps/chat/services.py
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from ..models import Message
+from apps.chat.models import Message
 
 def send_message(*, conversation, sender, text):
     message = Message.objects.create(

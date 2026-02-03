@@ -41,7 +41,8 @@ project_app=[
     'apps.cost_category',
     'apps.cost_month',
     'apps.chat',
-    'apps.task'
+    'apps.task',
+    'apps.notification',
 ]
 INSTALLED_APPS = django_apps + project_app
 
