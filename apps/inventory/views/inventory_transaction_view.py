@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
@@ -25,7 +26,7 @@ class InventoryTransactionViewSet(viewsets.ModelViewSet):
             raise ValidationError("Inventory not found")
 
     def get_queryset(self):
-        return InventoryTransaction.objects.filter(inventory=self.get_inventory()).prefetch_related("items__product").order_by("-created_at")
+        return InventoryTransaction.objects.filter(inventory=self.get_inventory()).prefetch_related("items__product").order_by("-created_at","-id").distinct()
 
     def get_serializer_class(self):
         if self.action == "create":
