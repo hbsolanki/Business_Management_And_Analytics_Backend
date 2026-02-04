@@ -4,15 +4,9 @@ from apps.inventory.models import InventoryTransaction, InventoryProduct
 
 class InventoryTransactionFilter(django_filters.FilterSet):
     action=django_filters.CharFilter(field_name="action",lookup_expr="exact")
-    from_date = django_filters.DateFilter(
-        field_name="created_at",
-        lookup_expr="date__gte"
-    )
+    from_date = django_filters.DateTimeFilter(field_name="created_at", lookup_expr="gte")
 
-    to_date = django_filters.DateFilter(
-        field_name="created_at",
-        lookup_expr="date__lte"
-    )
+    to_date = django_filters.DateTimeFilter(field_name="created_at",lookup_expr="lte")
     product_name=django_filters.CharFilter(field_name="items__product__name",lookup_expr="icontains")
     product_sku=django_filters.CharFilter(field_name="items__product__sku",lookup_expr="icontains")
 
