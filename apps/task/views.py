@@ -63,11 +63,11 @@ class TaskViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'],url_path='assigned_by')
     def task_assigned_by(self, request, *args, **kwargs):
         tasks=Task.objects.filter(assigned_by=request.user)
-        serializer=TaskReadSerializer(tasks,many=True)
+        serializer=self.get_serializer(tasks,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'],url_path='assignee')
     def task_assignee(self, request, *args, **kwargs):
         tasks=Task.objects.filter(assignee=request.user)
-        serializer=TaskReadSerializer(tasks,many=True)
+        serializer=self.get_serializer(tasks,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
