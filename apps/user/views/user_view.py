@@ -35,6 +35,8 @@ class UserViewSet(ModelViewSet):
             return update.UserUpdateSerializer
         if self.request.user.role == User.Role.OWNER:
             return read.OwnerUserReadSerializer
+        if self.action=="search":
+            return BusinessUserSerializer
         return read.UserReadSerializer
 
     def get_queryset(self):
@@ -142,7 +144,7 @@ class UserViewSet(ModelViewSet):
         queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = BusinessUserSerializer(page, many=True)
+            serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
         serializer = BusinessUserSerializer(queryset, many=True)
