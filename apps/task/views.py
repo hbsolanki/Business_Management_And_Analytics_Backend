@@ -82,17 +82,12 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'],url_path='assigned_by')
     def task_assigned_by(self, request, *args, **kwargs):
-<<<<<<< HEAD
         tasks=Task.objects.filter(assigned_by=request.user)
         serializer=self.get_serializer(tasks,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'],url_path='assignee')
     def task_assignee(self, request, *args, **kwargs):
-        tasks=Task.objects.filter(assignee=request.user)
-        serializer=self.get_serializer(tasks,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-=======
         user = self.request.user
         cache_key = f"tasks_assigned_by:user:{user.id}"
 
@@ -105,7 +100,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             cache.set(cache_key, task_ids, timeout=180)
 
         tasks=Task.objects.filter(id__in=tasks_ids)
-        serializer = TaskReadSerializer(tasks, many=True)
+        serializer = self.get_serializer(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'],url_path='assignee')
@@ -122,6 +117,5 @@ class TaskViewSet(viewsets.ModelViewSet):
             cache.set(cache_key, task_ids, timeout=180)
 
         tasks = Task.objects.filter(id__in=tasks_ids)
-        serializer = TaskReadSerializer(tasks, many=True)
+        serializer = self.get_serializer(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
->>>>>>> dev

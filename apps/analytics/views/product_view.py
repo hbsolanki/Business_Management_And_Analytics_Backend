@@ -13,6 +13,8 @@ from django.db.models import Sum,F
 from apps.user.permission import IsOwnerOrManager
 from apps.invoice.models import Invoice,ProductInvoice
 from drf_spectacular.utils import extend_schema
+from django.core.cache import cache
+from apps.core.cache import make_cache_key
 
 class AnalysisProductViewSet(GenericViewSet):
     permission_classes = [IsOwnerOrManager]
@@ -29,22 +31,39 @@ class AnalysisProductViewSet(GenericViewSet):
     @extend_schema(summary="Get Product Details", responses={200: ProductDetailsSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="details")
     def product_details(self, request):
+        cache_key = make_cache_key(request, "analytics","product_details", request.user)
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return Response(cached_data,status=status.HTTP_200_OK)
+
         products = Product.objects.all()
         serializer = ProductDetailsSerializer(products, many=True)
+        cache.set(cache_key, serializer.data, 60*5)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     @extend_schema(summary="Get Product Stock", responses={200: ProductStockSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="stocks")
     def product_stocks(self, request):
+        cache_key = make_cache_key(request, "analytics","product_stocks", request.user)
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return Response(cached_data,status=status.HTTP_200_OK)
+
         inventoryData = InventoryProduct.objects.select_related(
             "product", "product__product_category"
         )
         serializer = ProductStockSerializer(inventoryData, many=True)
+        cache.set(cache_key, serializer.data, 60*5)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     @extend_schema(summary="Get Product Performance",parameters=[ProductPerformanceFilterSerializer],responses={200: ProductPerformanceSerializer})
     @action(detail=False, methods=["get"], url_path="performance")
     def product_performance(self, request):
+        cache_key = make_cache_key(request, "analytics","product_performance", request.user)
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return Response(cached_data,status=status.HTTP_200_OK)
+
         qs = Invoice.objects.filter(business=request.user.business)
         filterset = ProductPerformanceFilter(request.GET, queryset=qs)
 
@@ -60,11 +79,15 @@ class AnalysisProductViewSet(GenericViewSet):
         )
 
         serializer = ProductPerformanceSerializer(data)
+        cache.set(cache_key, serializer.data, 60*5)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="performance/report")
     def product_performance_report(self, request):
-
+        cache_key = make_cache_key(request, "analytics","product_performance_report", request.user)
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return Response(cached_data,status=status.HTTP_200_OK)
         invoice_qs = Invoice.objects.filter(
             business=request.user.business
         )
@@ -109,12 +132,10 @@ class AnalysisProductViewSet(GenericViewSet):
             total_profit=Sum(F("quantity") * F("product__net_profit")),
             total_cost=Sum(F("quantity") * F("product__cost_price")),
         )
-
+        data={"summary": summary,"products": product_wise}
+        cache.set(cache_key, data, 60*5)
         return Response(
-            {
-                "summary": summary,
-                "products": product_wise,
-            },
+            data,
             status=status.HTTP_200_OK
         )
 

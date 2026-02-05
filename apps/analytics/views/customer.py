@@ -83,7 +83,7 @@ class CustomerViewSet(GenericViewSet):
     @extend_schema(summary="Customer Leaderboard Revenue", parameters=[CustomerInvoiceFilterSerializer],responses={200: CustomerRevenueLeaderboardSerializer(many=True)})
     @action(methods=["get"],detail=False,url_path="leaderboard/revenue")
     def customer_leaderboard_revenue(self, request):
-        cache_key = make_cache_key(request, "customer_leaderboard_revenue", request.user)
+        cache_key = make_cache_key(request, "analytics","customer_leaderboard_revenue", request.user)
 
         cached_data = cache.get(cache_key)
         if cached_data:
@@ -129,7 +129,7 @@ class CustomerViewSet(GenericViewSet):
     @extend_schema(summary="Customer Metrics Retention", parameters=[CustomerCreatedAtRangeSerializer],responses={200: CustomerRetentionAnalyticsSerializer})
     @action(methods=["get"], detail=False, url_path="metrics/retention")
     def customer_metrics_retention(self, request):
-        cache_key = make_cache_key(request, "customer_metrics_retention", request.user)
+        cache_key = make_cache_key(request, "analytics","customer_metrics_retention", request.user)
 
         cached_data = cache.get(cache_key)
         if cached_data:
@@ -160,7 +160,7 @@ class CustomerViewSet(GenericViewSet):
     @extend_schema(summary="Customer Product Preferences", parameters=[CustomerInvoiceFilterSerializer],responses={200: CustomerProductPreferenceSerializer(many=True)})
     @action(methods=["get"], detail=False, url_path="product/preferences")
     def customer_product_preference(self, request):
-        cache_key = make_cache_key(request, "customer_product_preference", request.user)
+        cache_key = make_cache_key(request, "analytics","customer_product_preference", request.user)
 
         cached_data = cache.get(cache_key)
 
@@ -209,9 +209,12 @@ class CustomerViewSet(GenericViewSet):
                 product_category=F("product__product_category__name"),
                 product_name=F("product__name"),
                 quantity=F("total_qty"),
-                total_revenue=F("revenue"),
+                total_revenue=ExpressionWrapper(
+                    F("revenue"),
+                    output_field=DecimalField(max_digits=14, decimal_places=2)
+                )
             )
-            .order_by("total_revenue","customer_id")
+            .order_by("-total_revenue","customer_id")
         )
 
 
@@ -230,7 +233,7 @@ class CustomerViewSet(GenericViewSet):
                    responses={200: CustomerProductNestedSerializer(many=True)})
     @action(methods=["get"], detail=False, url_path="product")
     def customer_product(self, request):
-        cache_key = make_cache_key(request, "customer_product", request.user)
+        cache_key = make_cache_key(request, "analytics","customer_product", request.user)
 
         cached_data = cache.get(cache_key)
 
@@ -298,7 +301,7 @@ class CustomerViewSet(GenericViewSet):
                    responses={200: CustomerSpendSerializers(many=True)})
     @action(methods=["get"], detail=False, url_path="spend")
     def customer_spend(self, request):
-        cache_key = make_cache_key(request, "customer_spend", request.user)
+        cache_key = make_cache_key(request,"analytics" ,"customer_spend", request.user)
 
         cached_data = cache.get(cache_key)
 
@@ -320,7 +323,6 @@ class CustomerViewSet(GenericViewSet):
             )
             .order_by("-total_revenue")
         )
-
-        # response = self.get_paginated_response(data)
-        cache.set(cache_key, data, timeout=60 * 5)
-        return Response(data, status=status.HTTP_200_OK)
+        serializer=CustomerSpendSerializers(data, many=True)
+        cache.set(cache_key, serializer.data, timeout=60 * 5)
+        return Response(serializer.data, status=status.HTTP_200_OK)

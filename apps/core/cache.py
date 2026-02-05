@@ -2,7 +2,7 @@ import hashlib
 import json
 
 
-def make_cache_key(request, prefix, user):
+def make_cache_key(request, base_name,prefix, user):
     params = request.query_params.dict()
 
     raw = {
@@ -12,7 +12,7 @@ def make_cache_key(request, prefix, user):
     }
 
     encoded = json.dumps(raw, sort_keys=True)
-    return f"analytics:{hashlib.md5(encoded.encode()).hexdigest()}"
+    return f"{base_name}:{hashlib.md5(encoded.encode()).hexdigest()}"
 
 
 CURSOR_ORDERINGS = {

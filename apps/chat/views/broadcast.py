@@ -8,13 +8,21 @@ from apps.chat.serializers.broadcast import BroadcastGroupCreateSerializer,Broad
 from apps.chat.models import BroadcastGroup,Conversation,Message,BroadcastGroupMember
 from apps.user.models import User
 from apps.user.permission import IsOwnerOrManager
+from django.core.cache import cache
 
 
 class BroadcastViewSet(ModelViewSet):
     permission_classes = [IsOwnerOrManager]
 
     def get_queryset(self):
-        return BroadcastGroup.objects.filter(user=self.request.user)
+        user = self.request.user
+        cache_key = f"broadcast-queryset:user:{user.id}"
+        data = cache.get(cache_key)
+        if data:
+            return data
+        data= BroadcastGroup.objects.filter(user=self.request.user)
+        cache.set(cache_key, data, timeout=60*3)
+        return data
 
     def get_serializer_class(self):
         if self.action == "create":
