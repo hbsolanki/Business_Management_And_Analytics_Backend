@@ -69,15 +69,15 @@ class BusinessViewSet(ModelViewSet):
         except Exception as e:
             return Response({"error","something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=["get"], url_path="users")
-    def business_users(self, request, pk=None):
-        try:
-            users = User.objects.filter(business=request.user.business)
-
-            serializer = self.get_serializer(users, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception:
-            return Response({"error": "Business not found"}, status=status.HTTP_404_NOT_FOUND)
+    # @action(detail=False, methods=["get"], url_path="users")
+    # def business_users(self, request, pk=None):
+    #     try:
+    #         users = User.objects.filter(business=request.user.business)
+    #
+    #         serializer = self.get_serializer(users, many=True)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     except Exception:
+    #         return Response({"error": "Business not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 

@@ -26,7 +26,14 @@ class InventoryTransactionViewSet(viewsets.ModelViewSet):
             raise ValidationError("Inventory not found")
 
     def get_queryset(self):
-        return InventoryTransaction.objects.filter(inventory=self.get_inventory()).prefetch_related("items__product").order_by("-created_at","-id").distinct()
+        inventory = self.get_inventory()
+        cache_key = f"inventory:{inventory.id}:inventory_transaction"
+        data = cache.get(cache_key)
+        if data:
+            return data
+        data = InventoryTransaction.objects.filter(inventory=self.get_inventory()).prefetch_related("items__product").order_by("-created_at","-id").distinct()
+        cache.set(cache_key, data, timeout=60 * 2)
+        return data
 
     def get_serializer_class(self):
         if self.action == "create":

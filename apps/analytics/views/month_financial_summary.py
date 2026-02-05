@@ -10,6 +10,8 @@ from apps.analytics.serializers.filter import MonthYearFilterSerializer
 from apps.cost_month.models import MonthlyFinancialSummary
 from apps.user.permission import IsOwnerOrManager
 from drf_spectacular.utils import extend_schema
+from django.core.cache import cache
+from apps.core.cache import make_cache_key
 
 class MonthFinancialSummaryViewSet(GenericViewSet):
     permission_classes = [IsOwnerOrManager]
@@ -29,6 +31,11 @@ class MonthFinancialSummaryViewSet(GenericViewSet):
     @extend_schema(summary="Get Month Breakdown",parameters=[MonthYearFilterSerializer],responses={200: MonthFinancialBreakdownSerializer})
     @action(detail=False, methods=["get"], url_path="breakdown")
     def month_breakdown(self, request):
+        cache_key = make_cache_key(request, "analytics","month_breakdown", request.user)
+        cache_data = cache.get(cache_key)
+        if cache_data:
+            return Response(cache_data, status=status.HTTP_200_OK)
+
         qs = self.get_queryset()
 
         filtered_set = MonthlySummaryMonthYearFilter(request.GET, queryset=qs)
@@ -41,10 +48,16 @@ class MonthFinancialSummaryViewSet(GenericViewSet):
             )
 
         serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        cache.set(cache_key, serializer.data, 60*5)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="netprofit")
     def month_net_profit(self, request):
+        cache_key = make_cache_key(request,"analytics", "month_net_profit", request.user)
+        cache_data = cache.get(cache_key)
+        if cache_data:
+            return Response(cache_data, status=status.HTTP_200_OK)
+
         queryset = self.get_queryset()
         filter_instance = MonthlySummaryMonthYearFilter(request.GET, queryset=queryset)
 
@@ -55,6 +68,7 @@ class MonthFinancialSummaryViewSet(GenericViewSet):
             return Response({"detail": "Data not found"}, status=status.HTTP_404_NOT_FOUND)
 
         result = filtered_queryset.values_list('net_profit_after_tax', flat=True)
-
-        return Response(list(result), status=status.HTTP_200_OK)
+        data=list(result)
+        cache.set(cache_key, data, 60*5)
+        return Response(data, status=status.HTTP_200_OK)
 

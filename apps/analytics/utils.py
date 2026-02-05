@@ -17,6 +17,6 @@ def make_cache_key(request, prefix, user):
 
 CURSOR_ORDERINGS = {
     "customer_leaderboard_revenue": ("-total_revenue", "customer_id"),
-    "customer_product_preference": ("total_revenue", "customer_id"),
+    "customer_product_preference": ("-total_revenue", "customer_id"),
 
 }

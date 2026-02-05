@@ -5,10 +5,12 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q
+from django.core.cache import cache
 
 from apps.chat.models import Conversation, Message
 from apps.chat.serializers.message import MessageSerializer
 from apps.chat.pagination import MessageCursorPagination
+from apps.core.cache import make_cache_key
 
 
 class MessagesViewSet(ModelViewSet):
@@ -40,6 +42,10 @@ class MessagesViewSet(ModelViewSet):
 
     @action(detail=False, methods=["get"],url_path=r"conversation/(?P<conversation_id>\d+)")
     def by_conversation(self, request, conversation_id=None):
+        cache_key = make_cache_key(request,"chat",f":conversation:{conversation_id}",request.user)
+        cache_data = cache.get(cache_key)
+        if cache_data:
+            return Response(cache_data,status=status.HTTP_200_OK)
         conversation = Conversation.objects.filter(
             id=conversation_id
         ).filter(
@@ -59,9 +65,12 @@ class MessagesViewSet(ModelViewSet):
         page = self.paginate_queryset(messages_qs)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            response=self.get_paginated_response(serializer.data)
+            cache.set(cache_key, response.data, timeout=60 * 2)
+            return response
 
         serializer = self.get_serializer(messages_qs, many=True)
+        cache.set(cache_key, serializer.data, timeout=60*2)
         return Response(serializer.data)
 
 

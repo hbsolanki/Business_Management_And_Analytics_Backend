@@ -3,7 +3,7 @@ from apps.inventory.views import inventory_view,inventory_product_view,inventory
 from django.urls import path,include
 
 router = DefaultRouter()
-router.register("", inventory_view.InventoryViewSet, basename="inventory")
+# router.register("", inventory_view.InventoryViewSet, basename="inventory")
 router.register("stock", inventory_product_view.InventoryProductViewSet, basename="inventoryproduct")
 router.register("transaction", inventory_transaction_view.InventoryTransactionViewSet, basename="inventorytransaction")
 

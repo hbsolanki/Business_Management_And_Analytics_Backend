@@ -14,6 +14,8 @@ from drf_spectacular.utils import extend_schema
 from django.db.models import Q
 from apps.chat.pagination import ConversationCursorPagination
 from rest_framework.decorators import action
+from django.core.cache import cache
+from apps.core.cache import make_cache_key
 
 
 class ConversationViewSet(ModelViewSet):
@@ -30,6 +32,7 @@ class ConversationViewSet(ModelViewSet):
             .select_related("user1", "user2")
         )
 
+
     def get_serializer_class(self):
         if self.action=="create":
             return ConversationGetOrCreateResponseSerializer
@@ -38,6 +41,23 @@ class ConversationViewSet(ModelViewSet):
 
         return ConversationReadSerializer
 
+    def list(self,request):
+        cache_key=make_cache_key(request,"chat","conversation_list",request.user)
+        cache_data=cache.get(cache_key)
+        if cache_data:
+            return Response(cache_data)
+        queryset = self.get_queryset().order_by("-updated_at","-id")
+
+        page_data=self.paginate_queryset(queryset)
+        if page_data is not None:
+            serializer = self.get_serializer(page_data,many=True)
+            response=self.get_paginated_response(serializer.data)
+            cache.set(cache_key, response.data, timeout=60)
+            return response
+
+        serializer=self.get_serializer(queryset,many=True)
+        cache.set(cache_key, serializer.data, timeout=60)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
     @extend_schema(summary="Create or get conversation",request=ConversationGetOrCreateSerializer,responses={200: ConversationGetOrCreateResponseSerializer})
     def create(self, request):
