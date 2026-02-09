@@ -6,7 +6,7 @@ from django.utils.timezone import make_aware
 
 from apps.analytics.utils.tax_calculation import calculate_tax_on_net_profit
 
-from apps.business_app.models import Business
+from apps.business.models import Business
 from apps.cost_category.models import MonthlyCostCategory
 from apps.cost_month.models import MonthlyProductPerformance,MonthlyFinancialSummary
 from apps.invoice.models import Invoice,ProductInvoice

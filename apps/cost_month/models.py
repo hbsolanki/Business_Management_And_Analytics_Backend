@@ -1,6 +1,6 @@
 from django.db import models
 from apps.core.model import BaseModel
-from apps.business_app.models import Business
+from apps.business.models import Business
 from apps.product.models import Product
 
 

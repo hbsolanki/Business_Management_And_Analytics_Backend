@@ -1,4 +1,4 @@
 from django.contrib import admin
-from apps.business_app.models import Business
+from apps.business.models import Business
 
 admin.site.register(Business)

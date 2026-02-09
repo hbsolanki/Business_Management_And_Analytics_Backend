@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from apps.user.models import User
-from apps.business_app.serializers import OnwerBusinessReadSerializer, BusinessReadSerializer
+from apps.business.serializers import OnwerBusinessReadSerializer, BusinessReadSerializer
 from apps.user.serializers.base import BaseUserReadSerializer
 
 class UserReadSerializer(BaseUserReadSerializer):

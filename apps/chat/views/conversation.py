@@ -16,11 +16,12 @@ from apps.chat.pagination import ConversationCursorPagination
 from rest_framework.decorators import action
 from django.core.cache import cache
 from apps.core.cache import make_cache_key
+from apps.chat.permission import ChatFeaturePermission
 
 
 class ConversationViewSet(ModelViewSet):
     http_method_names = ["get", "post","delete"]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ChatFeaturePermission]
     serializer_class = ConversationGetOrCreateResponseSerializer
     pagination_class = ConversationCursorPagination
 

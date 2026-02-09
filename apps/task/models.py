@@ -1,7 +1,7 @@
 from datetime import timezone
 from apps.core.model import BaseModel
 from apps.user.models import User
-from apps.business_app.models import Business
+from apps.business.models import Business
 from django.db import models
 
 

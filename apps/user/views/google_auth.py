@@ -10,7 +10,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from apps.user.models import User
 
-from apps.business_app.models import Business
+from apps.business.models import Business
 
 User = get_user_model()
 

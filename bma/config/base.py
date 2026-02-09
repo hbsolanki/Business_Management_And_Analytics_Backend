@@ -32,7 +32,7 @@ django_apps=[
 ]
 project_app=[
     'apps.user',
-    'apps.business_app',
+    'apps.business',
     'apps.product',
     'apps.inventory',
     'apps.customer',
@@ -43,6 +43,7 @@ project_app=[
     'apps.chat',
     'apps.task',
     'apps.notification',
+    'apps.subscription'
 ]
 INSTALLED_APPS = django_apps + project_app
 

@@ -11,10 +11,11 @@ from apps.chat.models import Conversation, Message
 from apps.chat.serializers.message import MessageSerializer
 from apps.chat.pagination import MessageCursorPagination
 from apps.core.cache import make_cache_key
+from apps.chat.permission import ChatFeaturePermission
 
 
 class MessagesViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ChatFeaturePermission]
     pagination_class = MessageCursorPagination
     queryset = Message.objects.none()
 

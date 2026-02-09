@@ -36,7 +36,7 @@ class AnalysisProductViewSet(GenericViewSet):
         if cached_data:
             return Response(cached_data,status=status.HTTP_200_OK)
 
-        products = Product.objects.all()
+        products = Product.objects.filter(business=request.user.business)
         serializer = ProductDetailsSerializer(products, many=True)
         cache.set(cache_key, serializer.data, 60*5)
         return Response(serializer.data,status=status.HTTP_200_OK)
@@ -49,7 +49,7 @@ class AnalysisProductViewSet(GenericViewSet):
         if cached_data:
             return Response(cached_data,status=status.HTTP_200_OK)
 
-        inventoryData = InventoryProduct.objects.select_related(
+        inventoryData = InventoryProduct.objects.filter(business=request.user.business).select_related(
             "product", "product__product_category"
         )
         serializer = ProductStockSerializer(inventoryData, many=True)
