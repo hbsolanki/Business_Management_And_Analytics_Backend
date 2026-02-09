@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from fontTools.subset import usage
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +11,8 @@ from apps.product.permission import ProductPermission
 from apps.product.filters import ProductFilter
 from apps.core.pagination import CursorPagination
 from apps.core.cache import make_cache_key
+from apps.subscription.decorators.subscription import limit_required
+from apps.subscription.models import Subscription,Usage
 
 
 class ProductViewSet(ModelViewSet):
@@ -34,6 +37,7 @@ class ProductViewSet(ModelViewSet):
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
 
+    @limit_required("max_products","product_created")
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -52,6 +56,12 @@ class ProductViewSet(ModelViewSet):
             created_by=request.user
         )
         cache.delete_pattern("")
+
+        #Usage Update
+        subscription = Subscription.objects.filter(business=request.user.business).first()
+        usage=Usage.objects.filter(subscription=subscription).first()
+        usage.product_created+=1
+        usage.save(update_fields=["product_created"])
 
         return Response(
             {

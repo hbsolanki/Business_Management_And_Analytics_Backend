@@ -8,11 +8,12 @@ from apps.chat.serializers.broadcast import BroadcastGroupCreateSerializer,Broad
 from apps.chat.models import BroadcastGroup,Conversation,Message,BroadcastGroupMember
 from apps.user.models import User
 from apps.user.permission import IsOwnerOrManager
+from apps.chat.permission import ChatFeaturePermission
 from django.core.cache import cache
 
 
 class BroadcastViewSet(ModelViewSet):
-    permission_classes = [IsOwnerOrManager]
+    permission_classes = [ChatFeaturePermission,IsOwnerOrManager]
 
     def get_queryset(self):
         user = self.request.user

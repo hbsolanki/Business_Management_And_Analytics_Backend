@@ -4,7 +4,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.user.filters import UserFilter
 from apps.user.permission import IsOwner,IsOwnerOrManager,CanModifyUser,CanDeleteUser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from apps.user.services.user_service import  create_user,create_manager_employee
 from apps.user.serializers import  create,read,update
 from apps.user.models import User
@@ -13,22 +13,27 @@ from rest_framework.response import Response
 from django.core.cache import cache
 import random
 from apps.core.pagination import CursorPagination
-from apps.business_app.serializers import BusinessUserSerializer
+from apps.business.serializers import BusinessUserSerializer
 
 
 class UserViewSet(ModelViewSet):
     pagination_class = CursorPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = UserFilter
+    search_fields = ["username"]
 
     def get_permissions(self):
         if self.action in ["update", "partial_update"]:
             return [CanModifyUser()]
         if self.action in ["destroy", "delete"]:
             return [CanDeleteUser()]
+        if self.action == "create":
+            return [AllowAny()]
         return [IsAuthenticated()]
 
     def get_serializer_class(self):
+        if self.action == "create":
+            return create.OwnerCreateSerializer
         if self.action == 'partial_update':
             if self.request.user.role == User.Role.OWNER:
                 return update.OwnerUpdateSerializer
@@ -58,85 +63,15 @@ class UserViewSet(ModelViewSet):
         except User.DoesNotExist:
             return Response({"error":"user not found"},status=status.HTTP_404_NOT_FOUND)
 
+    def perform_create(self, serializer):
+        serializer.save(role=User.Role.Owner)
+
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
-    @action(
-        detail=False,
-        methods=["GET", "POST"],
-        url_path="manager",
-        permission_classes=[IsOwner],
-    )
-    def manager(self, request):
-
-        if request.method == "GET":
-            managers = User.objects.filter(
-                business=request.user.business,
-                role=User.Role.MANAGER,
-            )
-            serializer = read.UserReadSerializer(managers, many=True)
-            return Response(serializer.data)
-
-        serializer = create.ManagerCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        manager = create_manager_employee(
-            **serializer.validated_data,
-            business=request.user.business,
-            user=request.user,
-            role=User.Role.MANAGER,
-        )
-
-        return Response(
-            {
-                "message": "Manager created successfully",
-                "manager": {
-                    "id": manager.id,
-                    "username": manager.username,
-                },
-            },
-            status=status.HTTP_201_CREATED,
-        )
-
-    @action(
-        detail=False,
-        methods=["GET", "POST"],
-        url_path="employee",
-        permission_classes=[IsOwnerOrManager],
-    )
-    def employee(self, request):
-
-        if request.method == "GET":
-            employees = User.objects.filter(
-                business=request.user.business,
-                role=User.Role.EMPLOYEE,
-            )
-            serializer = read.UserReadSerializer(employees, many=True)
-            return Response(serializer.data)
-
-        serializer = create.EmployeeCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        employee = create_manager_employee(
-            **serializer.validated_data,
-            business=request.user.business,
-            user=request.user,
-            role=User.Role.EMPLOYEE,
-        )
-
-        return Response(
-            {
-                "message": "Employee created successfully",
-                "employee": {
-                    "id": employee.id,
-                    "username": employee.username,
-                },
-            },
-            status=status.HTTP_201_CREATED,
-        )
 
     @action(detail=False, methods=["GET"],permission_classes=[IsAuthenticated])
     def search(self, request):

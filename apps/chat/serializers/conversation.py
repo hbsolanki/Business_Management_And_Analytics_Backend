@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.chat.models import Conversation
-from apps.business_app.serializers import BusinessUserSerializer
+from apps.business.serializers import BusinessUserSerializer
 
 
 class ConversationGetOrCreateSerializer(serializers.Serializer):

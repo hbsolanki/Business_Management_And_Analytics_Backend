@@ -1,5 +1,5 @@
 from django.db import models
-from apps.business_app.models import Business
+from apps.business.models import Business
 from apps.core.model import BaseModel
 
 

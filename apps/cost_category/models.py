@@ -1,5 +1,5 @@
 from apps.core.model import BaseModel
-from apps.business_app.models import Business
+from apps.business.models import Business
 from django.db import models
 from apps.cost_month.models import MonthlyFinancialSummary
 

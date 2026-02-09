@@ -12,7 +12,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 urlpatterns = [
 
     path('admin/', admin.site.urls),
-    path('business/',include('apps.business_app.urls')),
+    path('business/',include('apps.business.urls')),
     path('user/',include('apps.user.urls')),
     path('product/',include('apps.product.urls')),
     path('inventory/',include('apps.inventory.urls')),
@@ -24,6 +24,7 @@ urlpatterns = [
     path('chat/',include('apps.chat.urls')),
     path('task/',include('apps.task.urls')),
     path('notification/',include('apps.notification.urls')),
+    path('subscription/',include('apps.subscription.urls')),
 
     #urls
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

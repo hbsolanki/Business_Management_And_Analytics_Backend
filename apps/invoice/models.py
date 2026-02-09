@@ -4,7 +4,7 @@ from apps.core.model import BaseModel
 from apps.customer.models import Customer
 from apps.product.models import Product
 from apps.user.models import User
-from apps.business_app.models import Business
+from apps.business.models import Business
 
 
 class Invoice(BaseModel):

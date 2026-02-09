@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from apps.business_app.models import Business
+from apps.business.models import Business
 from apps.user.serializers.base import BaseUserSerializer
 from apps.user.models import User
+
 
 class BusinessCreateSerializer(BaseUserSerializer):
     name = serializers.CharField(required=True)

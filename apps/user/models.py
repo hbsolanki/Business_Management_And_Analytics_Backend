@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser,UserManager
-from apps.business_app.models import Business
+from apps.business.models import Business
 from apps.core.model import BaseModel
 from apps.core.active_use_manager import ActiveUserManager
 
