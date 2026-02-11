@@ -1,9 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from apps.business.models import Business
-from apps.core.model import BaseModel
+from apps.base.models import BaseModel
 from apps.product.models import Product
-from apps.user.models import User
 
 class Inventory(models.Model):
     business=models.OneToOneField(to=Business, on_delete=models.CASCADE)
@@ -11,6 +10,8 @@ class Inventory(models.Model):
     class Meta:
         db_table="bma_inventory"
         indexes=[models.Index(fields=["business"])]
+        constraints = [
+            models.UniqueConstraint(fields=["business"], name="unique_inventory_business")]
 
 
 class InventoryProduct(BaseModel):
@@ -25,12 +26,12 @@ class InventoryProduct(BaseModel):
             models.UniqueConstraint(fields=["inventory", "product"],name="unique_inventory_product") ]
 
 class InventoryTransaction(BaseModel):
-    action_types=[
-        ("IN","Stock In"),
-        ("OUT","Stock Out")
-    ]
 
-    action=models.CharField(max_length=10,choices=action_types)
+    class Action(models.TextChoices):
+        IN = "IN", "Stock In"
+        OUT = "OUT", "Stock Out"
+
+    action=models.CharField(max_length=10,choices=Action.choices)
     description=models.CharField(max_length=200)
     inventory=models.ForeignKey(Inventory,on_delete=models.CASCADE,related_name="inventory_transactions")
 

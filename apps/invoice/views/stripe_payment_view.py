@@ -7,13 +7,13 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from apps.invoice.models import Invoice
 from datetime import datetime
-from apps.invoice.permission import InvoicePermission
+from apps.base.permission.model_permissions import ModelPermissions
 from apps.invoice.tasks import send_invoice_email
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class PaymentViewSet(viewsets.ViewSet):
-    permission_classes = [InvoicePermission]
+    permission_classes = [ModelPermissions]
 
     @action(detail=False, methods=["post"], url_path="create-intent")
     def create_intent(self, request):

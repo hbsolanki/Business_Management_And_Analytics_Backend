@@ -1,46 +1,21 @@
 from rest_framework import serializers
+import re
 from apps.business.models import Business
-from apps.user.serializers.base import BaseUserSerializer
-from apps.user.models import User
 
-
-class BusinessCreateSerializer(BaseUserSerializer):
-    name = serializers.CharField(required=True)
-    description = serializers.CharField(required=True)
-    first_name = serializers.CharField(max_length=150,required=True)
-    last_name = serializers.CharField(max_length=150,required=True)
-    username = serializers.CharField(max_length=150,required=True)
-    password = serializers.CharField(write_only=True,required=True)
-    mobile_number = serializers.CharField()
+class BusinesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Business
-        fields=['name','description','first_name','last_name','username','password','mobile_number']
+        fields=["id","name","gst_number","description"]
+        read_only_fields = ["id"]
+
+    def validate_gst_number(self, value):
+        if value:
+            pattern = r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$'
+            if not re.match(pattern, value):
+                raise serializers.ValidationError("Invalid GST number format")
+        return value
 
 
-class BusinessReadSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Business
-        fields=['id','name','description']
-
-
-class OnwerBusinessReadSerializer(BusinessReadSerializer):
-
-    class Meta:
-        model = Business
-        fields = BusinessReadSerializer.Meta.fields+[ 'haveEquity', 'assets']
-
-
-class UpdateBusinessSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Business
-        fields = ['name','assets','haveEquity','description']
-
-
-class BusinessUserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields=["id","username","profile_picture","first_name","last_name","email","mobile_number","role"]
+    def create(self, validated_data):
+        return Business.objects.create(**validated_data)

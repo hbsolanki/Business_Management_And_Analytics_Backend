@@ -1,12 +1,13 @@
 from django.core.cache import cache
 from rest_framework import viewsets
+from apps.base.permission.model_permissions import ModelPermissions
 from apps.product.models import ProductCategory
 from apps.product.serializers.product_category import ProductCategorySerializer
-from apps.product.permission import ProductPermission
+
 
 
 class ProductCategoryViewSet(viewsets.ModelViewSet):
-    permission_classes = [ProductPermission]
+    permission_classes = [ModelPermissions]
     serializer_class = ProductCategorySerializer
 
     def get_queryset(self):

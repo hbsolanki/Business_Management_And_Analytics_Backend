@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser,UserManager
 from apps.business.models import Business
-from apps.core.model import BaseModel
-from apps.core.active_use_manager import ActiveUserManager
+from apps.base.models import BaseModel
+from apps.base.utils.active_use_manager import ActiveUserManager
 
 class User(BaseModel,AbstractUser):
     objects = ActiveUserManager()
@@ -16,7 +16,6 @@ class User(BaseModel,AbstractUser):
     class Work(models.TextChoices):
         PRODUCT = "PRODUCT","Production"
         INVENTORY = "INVENTORY", "Inventory"
-        EMPLOYEE = "EMPLOYEE", "Employee"
         ANALYTICS = "ANALYTICS", "Analytics"
         INVOICE = "INVOICE", "Invoice"
 
@@ -35,6 +34,16 @@ class User(BaseModel,AbstractUser):
         db_table ="bma_user"
         constraints = [
             models.UniqueConstraint(fields=["business", "username"], name="unique_username_per_business"),]
+        indexes = [
+            models.Index(fields=["business", "username"]),
+        ]
+        permissions = [
+            ("can_create_owner", "Can create owner"),
+            ("can_create_manager", "Can create manager"),
+            ("can_create_employee", "Can create employee"),
+            ("can_update_salary", "Can update salary"),
+            ("can_update_work", "Can update work"),
+        ]
 
     def __str__(self):
         return self.username

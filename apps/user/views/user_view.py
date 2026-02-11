@@ -1,86 +1,78 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
-
+from rest_framework.permissions import AllowAny,DjangoModelPermissions
 from apps.user.filters import UserFilter
-from apps.user.permission import IsOwner,IsOwnerOrManager,CanModifyUser,CanDeleteUser
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from apps.user.services.user_service import  create_user,create_manager_employee
-from apps.user.serializers import  create,read,update
+from django.db.models import Q
 from apps.user.models import User
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.cache import cache
 import random
-from apps.core.pagination import CursorPagination
-from apps.business.serializers import BusinessUserSerializer
+from apps.base.pagination import CursorPagination
+from apps.user.serializers.user import UserSerializer,UserBasicDetailsSerializer,OwnerCreateSerializer
+from apps.user.utils.group_permission import sync_user_work_group
 
 
 class UserViewSet(ModelViewSet):
+    http_method_names = ["get", "post", "patch", "delete"]
     pagination_class = CursorPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = UserFilter
     search_fields = ["username"]
 
     def get_permissions(self):
-        if self.action in ["update", "partial_update"]:
-            return [CanModifyUser()]
-        if self.action in ["destroy", "delete"]:
-            return [CanDeleteUser()]
         if self.action == "create":
             return [AllowAny()]
-        return [IsAuthenticated()]
+        return [DjangoModelPermissions()]
 
     def get_serializer_class(self):
+        if self.action == "list":
+            return UserBasicDetailsSerializer
         if self.action == "create":
-            return create.OwnerCreateSerializer
-        if self.action == 'partial_update':
-            if self.request.user.role == User.Role.OWNER:
-                return update.OwnerUpdateSerializer
-            return update.UserUpdateSerializer
-        if self.request.user.role == User.Role.OWNER:
-            return read.OwnerUserReadSerializer
-        if self.action=="search":
-            return BusinessUserSerializer
-        return read.UserReadSerializer
+            return OwnerCreateSerializer
+        return UserSerializer
 
     def get_queryset(self):
         user = self.request.user
+        base_qs = User.objects.filter(business=user.business)
 
-        if user.role in {User.Role.OWNER, User.Role.MANAGER}:
-            return User.objects.filter(business=user.business)
+        if user.role == User.Role.OWNER:
+            return base_qs
 
-        return User.objects.filter(id=user.id)
+        if user.role == User.Role.MANAGER:
+            return base_qs.filter(
+                Q(role=User.Role.EMPLOYEE) | Q(id=user.id)
+            )
+
+        return base_qs.filter(id=user.id)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(User.objects.filter(business=request.user.business))
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     def retrieve(self, request,pk):
         cache_key=f"user:{pk}"
         user=cache.get(cache_key)
         try:
             if not user:
-                user=self.get_serializer(User.objects.get(pk=pk)).data
-                cache.set(cache_key,user,timeout=80+int(random.random()*30))
+                user=self.get_serializer(self.get_object()).data
+                # cache.set(cache_key,user,timeout=80+int(random.random()*30))
             return Response(user, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({"error":"user not found"},status=status.HTTP_404_NOT_FOUND)
 
-    def perform_create(self, serializer):
-        serializer.save(role=User.Role.Owner)
+    def create(self, request):
+        request.data["role"]=User.Role.OWNER
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)
+        user=serializer.save(updated_by=self.request.user)
+        sync_user_work_group(user)
+        cache.delete(f"user:{user.id}")
 
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
 
-
-    @action(detail=False, methods=["GET"],permission_classes=[IsAuthenticated])
-    def search(self, request):
-        queryset = User.objects.filter(business=request.user.business,is_active=True)
-        queryset = self.filter_queryset(queryset)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = BusinessUserSerializer(queryset, many=True)
-        return Response(serializer.data)

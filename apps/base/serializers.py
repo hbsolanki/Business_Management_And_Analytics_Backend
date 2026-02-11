@@ -1,4 +1,6 @@
 from rest_framework import serializers
 
-class BaseSerializer(serializers.Serializer):
-    pass
+class BaseSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields=["id","created_at","updated_at","created_by","updated_by","is_active"]

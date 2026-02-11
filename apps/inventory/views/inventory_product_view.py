@@ -1,30 +1,29 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-
+from apps.base.permission.model_permissions import ModelPermissions
 from apps.inventory.models import InventoryProduct, Inventory
-from apps.inventory.serializers.read import InventoryProductReadSerializer
-from apps.inventory.permission import  InventoryPermission
+from apps.inventory.serializers.inventory_product import InventoryProductSerializer
 from apps.inventory.filters import InventoryProductFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from apps.core.pagination import  CursorPagination
+from apps.base.pagination import  CursorPagination
 from rest_framework.exceptions import ValidationError
 from django.core.cache import cache
-from apps.core.cache import make_cache_key
+from apps.base.utils.cache import make_cache_key
 
 
-class InventoryProductViewSet(viewsets.ModelViewSet):
-    permission_classes = [InventoryPermission]
+class InventoryProductViewSet(viewsets.GenericViewSet):
+
+    permission_classes = [ModelPermissions]
     filter_backends = [DjangoFilterBackend]
     filterset_class = InventoryProductFilter
     pagination_class = CursorPagination
-    serializer_class = InventoryProductReadSerializer
+    serializer_class = InventoryProductSerializer
 
     def get_inventory(self):
-        try:
-            return Inventory.objects.get(business=self.request.user.business)
-        except Inventory.DoesNotExist:
-            raise ValidationError("Inventory not found")
-
+        inventory, _ = Inventory.objects.get_or_create(
+            business=self.request.user.business
+        )
+        return inventory
     def get_queryset(self):
         inventory = self.get_inventory()
         return (

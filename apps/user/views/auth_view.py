@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework import status
 from django.contrib.auth import authenticate
-from apps.user.serializers.login import UserLoginSerializer
+from apps.user.serializers.user import UserLoginSerializer
 from apps.user.services.user_service import get_tokens_for_user
 from datetime import datetime
 

@@ -38,13 +38,14 @@ project_app=[
     'apps.customer',
     'apps.invoice',
     'apps.analytics',
-    'apps.cost_category',
-    'apps.cost_month',
+    'apps.cost',
     'apps.chat',
-    'apps.task',
+    'apps.tasks',
     'apps.notification',
-    'apps.subscription'
+    'apps.subscription',
+    'apps.base.apps.BaseConfig'
 ]
+
 INSTALLED_APPS = django_apps + project_app
 
 TEMPLATES = [
@@ -78,6 +79,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 STATIC_URL = "static/"
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

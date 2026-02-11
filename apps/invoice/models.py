@@ -1,9 +1,8 @@
 from django.db import models
 
-from apps.core.model import BaseModel
+from apps.base.models import BaseModel
 from apps.customer.models import Customer
 from apps.product.models import Product
-from apps.user.models import User
 from apps.business.models import Business
 
 
@@ -22,7 +21,11 @@ class Invoice(BaseModel):
 
     class Meta:
         db_table = "bma_invoice"
-
+        indexes = [models.Index(fields=["business"])]
+        permissions = [
+                ("create_invoice", "Can create invoice"),
+                ("update_invoice", "Can update invoice"),
+            ]
 
 class ProductInvoice(models.Model):
     product=models.ForeignKey(Product, on_delete=models.SET_NULL,related_name="product_invoice",blank=True,null=True)

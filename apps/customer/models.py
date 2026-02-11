@@ -1,6 +1,6 @@
 from django.db import models
 from apps.business.models import Business
-from apps.core.model import BaseModel
+from apps.base.models import BaseModel
 
 
 class Customer(BaseModel):
@@ -20,5 +20,5 @@ class Customer(BaseModel):
     class Meta:
         db_table = "bma_customer"
         indexes=[
-            models.Index(fields=["business"]),
+            models.Index(fields=["business","mobile_number"]),
         ]

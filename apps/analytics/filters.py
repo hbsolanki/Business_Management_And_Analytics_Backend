@@ -1,6 +1,6 @@
 import django_filters
-from apps.cost_category.models import MonthlyFinancialSummary
-from apps.cost_month.models import MonthlyProductPerformance
+from apps.cost.models import MonthlyFinancialSummary
+from apps.cost.models import MonthlyProductPerformance
 from apps.invoice.models import Invoice,ProductInvoice
 from datetime import datetime
 import calendar

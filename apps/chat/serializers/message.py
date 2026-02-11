@@ -7,6 +7,3 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ["id", "sender_id", "text", "created_at","is_updated"]
-
-class MessageByConversationResponseSerializer(serializers.ModelSerializer):
-    pass

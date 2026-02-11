@@ -1,22 +1,15 @@
 from rest_framework import serializers
 
 from apps.notification.models import Notification
-from apps.business.serializers import BusinessUserSerializer
-
-
-class NotificationCreateSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Notification
-        fields = []
-
+from apps.user.serializers.user import UserBasicDetailsSerializer
 
 class NotificationReadSerializer(serializers.ModelSerializer):
-    user=BusinessUserSerializer(read_only=True)
-    actor = BusinessUserSerializer(read_only=True)
+    user=UserBasicDetailsSerializer(read_only=True)
+    actor = UserBasicDetailsSerializer(read_only=True)
     class Meta:
         model = Notification
         fields = ["id","user","actor","title","content","action_type","action_link","is_read","created_at"]
+        read_only_fields = ["id","user","actor","title","content","action_type","action_link","is_read","created_at"]
 
 class NotificationBulkReadSerializer(serializers.Serializer):
     ids = serializers.ListField(

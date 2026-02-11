@@ -1,7 +1,6 @@
 from django.db import models
 from apps.business.models import Business
-from apps.core.model import BaseModel
-from apps.user.models import  User
+from apps.base.models import BaseModel
 
 
 class ProductCategory(BaseModel):
@@ -28,7 +27,6 @@ class Product(BaseModel):
 
     net_profit = models.DecimalField(max_digits=12,decimal_places=2,editable=False)
 
-
     product_category=models.ForeignKey(to=ProductCategory, on_delete=models.SET_NULL,null=True,blank=True)
     sku=models.CharField(max_length=50)
 
@@ -41,6 +39,11 @@ class Product(BaseModel):
             db_table = "bma_product"
             indexes = [models.Index(fields=['business', '-created_at'])]
             constraints = [models.UniqueConstraint(fields=["business", "sku"], name="unique_sku_per_business")]
+
+            permissions = [
+                ("create_product", "Can create product"),
+                ("update_product", "Can update product"),
+            ]
 
     def __str__(self):
             return self.name
