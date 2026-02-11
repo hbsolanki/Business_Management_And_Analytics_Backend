@@ -1,4 +1,4 @@
-# apps/chat/services.py
+# apps/chat/send_notification.py
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from apps.chat.models import Message

@@ -4,6 +4,7 @@ from apps.invoice.models import ProductInvoice,Invoice
 from apps.product.models import Product
 from apps.customer.serializers import CustomerSerializer
 
+
 class ProductInvoiceReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
@@ -15,8 +16,6 @@ class ProductInvoiceItemReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductInvoice
         fields=["id","product","quantity","base_price","selling_price"]
-
-
 
 class InvoiceReadSerializer(serializers.ModelSerializer):
     invoice_items =ProductInvoiceItemReadSerializer(many=True)

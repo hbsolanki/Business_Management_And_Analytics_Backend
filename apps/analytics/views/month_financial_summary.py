@@ -7,14 +7,14 @@ from rest_framework.response import Response
 from apps.analytics.filters import MonthlySummaryMonthYearFilter
 from apps.analytics.serializers.month_financial import MonthFinancialBreakdownSerializer
 from apps.analytics.serializers.filter import MonthYearFilterSerializer
-from apps.cost_month.models import MonthlyFinancialSummary
-from apps.user.permission import IsOwnerOrManager
+from apps.cost.models import MonthlyFinancialSummary
 from drf_spectacular.utils import extend_schema
 from django.core.cache import cache
-from apps.core.cache import make_cache_key
+from apps.base.utils.cache import make_cache_key
+from apps.analytics.permission import CanViewMonthFinancialAnalytics
 
 class MonthFinancialSummaryViewSet(GenericViewSet):
-    permission_classes = [IsOwnerOrManager]
+    permission_classes = [CanViewMonthFinancialAnalytics]
     filter_backends = [DjangoFilterBackend]
 
     def get_serializer_class(self):

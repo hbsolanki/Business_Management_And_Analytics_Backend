@@ -1,25 +1,23 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from fontTools.subset import usage
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.cache import cache
 
 from apps.product.models import Product
-from apps.product.serializers.product import ProductCreateSerializer, ProductUpdateSerializer, ProductReadSerializer
-from apps.product.permission import ProductPermission
+from apps.product.serializers.product import ProductSerializer
 from apps.product.filters import ProductFilter
-from apps.core.pagination import CursorPagination
-from apps.core.cache import make_cache_key
+from apps.base.pagination import CursorPagination
+from apps.base.utils.cache import make_cache_key
 from apps.subscription.decorators.subscription import limit_required
-from apps.subscription.models import Subscription,Usage
+from apps.base.permission.model_permissions import ModelPermissions
 
 
 class ProductViewSet(ModelViewSet):
     filter_backends =[DjangoFilterBackend]
     pagination_class = CursorPagination
     filterset_class = ProductFilter
-    permission_classes = [ProductPermission]
+    permission_classes = [ModelPermissions]
 
     def get_queryset(self):
         return Product.objects.filter(
@@ -28,11 +26,7 @@ class ProductViewSet(ModelViewSet):
 
 
     def get_serializer_class(self):
-        if self.action == "create":
-            return ProductCreateSerializer
-        elif self.action in ["update", "partial_update"]:
-            return ProductUpdateSerializer
-        return ProductReadSerializer
+        return ProductSerializer
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
@@ -43,25 +37,14 @@ class ProductViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        product = Product.objects.create(
-            name=data["name"],
-            cost_price=data["cost_price"],
-            base_price=data["base_price"],
-            description=data["description"],
-            product_category=data["product_category"],
-            sku=data["sku"],
-            input_gst_rate=data["input_gst_rate"],
-            output_gst_rate=data["output_gst_rate"],
-            business=request.user.business,
-            created_by=request.user
-        )
+        product=ProductSerializer.save()
         cache.delete_pattern("")
 
         #Usage Update
-        subscription = Subscription.objects.filter(business=request.user.business).first()
-        usage=Usage.objects.filter(subscription=subscription).first()
-        usage.product_created+=1
-        usage.save(update_fields=["product_created"])
+        # subscription = Subscription.objects.filter(business=request.user.business).first()
+        # usage=Usage.objects.filter(subscription=subscription).first()
+        # usage.product_created+=1
+        # usage.save(update_fields=["product_created"])
 
         return Response(
             {

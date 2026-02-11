@@ -1,16 +1,16 @@
-from rest_framework import viewsets
+from rest_framework import viewsets,mixins,status
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.decorators import action
 from apps.customer.models import Customer
 from apps.customer.serializers import CustomerSerializer
-from apps.customer.permission import CustomerPermission
+from apps.base.permission.model_permissions import ModelPermissions
 
 
-class CustomerViewSet(viewsets.ModelViewSet):
-    permission_classes = [CustomerPermission]
+class CustomerViewSet(viewsets.GenericViewSet,mixins.ListModelMixin):
+    permission_classes = [ModelPermissions]
     serializer_class = CustomerSerializer
+
 
     def get_queryset(self):
         return Customer.objects.filter(business=self.request.user.business)
@@ -23,7 +23,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
             raise ValidationError({"detail": "Customer must have mobile_number"})
 
         try:
-            customer = self.get_queryset().get(mobile_number=mobile_number)
+            customer =Customer.objects.get(business=request.user.business,mobile_number=mobile_number)
 
             serializer = CustomerSerializer(customer)
             return Response(

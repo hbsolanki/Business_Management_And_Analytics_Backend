@@ -1,6 +1,6 @@
 from django.db import models
 from apps.user.models import User
-from apps.core.model import BaseModel
+from apps.base.models import BaseModel
 
 class Notification(BaseModel):
 
@@ -9,8 +9,6 @@ class Notification(BaseModel):
         TASK_UPDATED = "TASK_UPDATED", "Task Updated"
         COMMENT = "COMMENT", "Comment"
         SYSTEM = "SYSTEM", "System"
-
-
 
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='notifications')
     actor = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,related_name='triggered_notifications')

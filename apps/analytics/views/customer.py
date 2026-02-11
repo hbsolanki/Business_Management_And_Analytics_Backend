@@ -6,7 +6,6 @@ from rest_framework import status
 from rest_framework.decorators import action
 
 from apps.invoice.models import Invoice,ProductInvoice
-from apps.user.permission import IsOwnerOrManager
 from apps.analytics.filters import CustomerCreatedAtRangeFilter, CustomerInvoiceFilter,CustomerInvoiceProductFilter,CustomerMonthYearFilter
 from apps.analytics.serializers.customer import (
     CustomerRevenueLeaderboardSerializer,
@@ -21,11 +20,12 @@ from drf_spectacular.utils import extend_schema
 from apps.analytics.pagination import AnalyticsCustomerCursorPagination,DefaultPagination
 from apps.analytics.utils import CURSOR_ORDERINGS
 from django.core.cache import cache
-from apps.core.cache import make_cache_key
+from apps.base.utils.cache import make_cache_key
+from apps.analytics.permission import CanViewCustomerAnalytics
 
 
 class CustomerViewSet(GenericViewSet):
-    permission_classes = [IsOwnerOrManager]
+    permission_classes = [CanViewCustomerAnalytics]
 
     def get_pagination_class(self):
         if self.action in CURSOR_ORDERINGS:

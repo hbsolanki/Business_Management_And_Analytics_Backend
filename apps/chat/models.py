@@ -1,4 +1,4 @@
-from apps.core.model import BaseModel
+from apps.base.models import BaseModel
 from django.db import models
 from apps.user.models import User
 

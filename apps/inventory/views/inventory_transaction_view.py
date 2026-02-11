@@ -1,29 +1,28 @@
 from django.core.cache import cache
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status,mixins
+from apps.base.permission.model_permissions import ModelPermissions
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.exceptions import ValidationError
 
 from apps.inventory.models import InventoryTransaction, Inventory
-from apps.inventory.serializers import create, read
-from apps.inventory.services.inventory_transaction_service import create_inventory_transaction
-from apps.inventory.permission import InventoryPermission
+from apps.inventory.utils.inventory_transaction_service import create_inventory_transaction
 from apps.inventory.filters import InventoryTransactionFilter
-from apps.core.pagination import CursorPagination
+from apps.base.pagination import CursorPagination
+from apps.inventory.serializers.inventory_transaction import InventoryTransactionSerializer
 
 
-class InventoryTransactionViewSet(viewsets.ModelViewSet):
-    permission_classes = [InventoryPermission]
+class InventoryTransactionViewSet(viewsets.GenericViewSet,mixins.ListModelMixin):
+    permission_classes = [ModelPermissions]
     filter_backends = [DjangoFilterBackend]
     filterset_class = InventoryTransactionFilter
     pagination_class = CursorPagination
+    serializer_class = InventoryTransactionSerializer
 
     def get_inventory(self):
-
-        try:
-            return Inventory.objects.get(business=self.request.user.business)
-        except Inventory.DoesNotExist:
-            raise ValidationError("Inventory not found")
+        inventory, _ = Inventory.objects.get_or_create(
+            business=self.request.user.business
+        )
+        return inventory
 
     def get_queryset(self):
         inventory = self.get_inventory()
@@ -35,11 +34,6 @@ class InventoryTransactionViewSet(viewsets.ModelViewSet):
         cache.set(cache_key, data, timeout=60 * 2)
         return data
 
-    def get_serializer_class(self):
-        if self.action == "create":
-            return create.InventoryTransCreateSerializer
-
-        return read.InventoryTransReadSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

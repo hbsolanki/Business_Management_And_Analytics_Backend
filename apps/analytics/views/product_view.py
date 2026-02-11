@@ -6,18 +6,19 @@ from apps.product.models import Product
 from apps.inventory.models import InventoryProduct
 from apps.analytics.serializers.product import ProductDetailsSerializer,ProductStockSerializer,ProductPerformanceSerializer
 from apps.analytics.serializers.filter import ProductPerformanceFilterSerializer
-from apps.cost_month.models import MonthlyProductPerformance
+from apps.cost.models import MonthlyProductPerformance
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.analytics.filters import ProductPerformanceMonthYearFilter,ProductPerformanceFilter,MonthlySummaryCreatedAtRangeFilter
 from django.db.models import Sum,F
-from apps.user.permission import IsOwnerOrManager
 from apps.invoice.models import Invoice,ProductInvoice
 from drf_spectacular.utils import extend_schema
 from django.core.cache import cache
-from apps.core.cache import make_cache_key
+from apps.base.utils.cache import make_cache_key
+from apps.analytics.permission import CanViewProductAnalytics
+
 
 class AnalysisProductViewSet(GenericViewSet):
-    permission_classes = [IsOwnerOrManager]
+    permission_classes = [CanViewProductAnalytics]
     filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):

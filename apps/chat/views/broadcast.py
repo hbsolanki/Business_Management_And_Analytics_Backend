@@ -4,16 +4,15 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from django.db import transaction
-from apps.chat.serializers.broadcast import BroadcastGroupCreateSerializer,BroadcastGroupReadSerializer,MessageBroadcastCreateSerializer
+from apps.chat.serializers.broadcast import BroadcastGroupSerializer,MessageBroadcastUserCreateSerializer
 from apps.chat.models import BroadcastGroup,Conversation,Message,BroadcastGroupMember
 from apps.user.models import User
-from apps.user.permission import IsOwnerOrManager
-from apps.chat.permission import ChatFeaturePermission
+from apps.base.permission.model_permissions import ModelPermissions
 from django.core.cache import cache
 
 
 class BroadcastViewSet(ModelViewSet):
-    permission_classes = [ChatFeaturePermission,IsOwnerOrManager]
+    permission_classes = [ModelPermissions]
 
     def get_queryset(self):
         user = self.request.user
@@ -26,12 +25,11 @@ class BroadcastViewSet(ModelViewSet):
         return data
 
     def get_serializer_class(self):
-        if self.action == "create":
-            return BroadcastGroupCreateSerializer
-        if self.action == "message_broadcast":
-            return MessageBroadcastCreateSerializer
 
-        return BroadcastGroupReadSerializer
+        if self.action == "message_broadcast":
+            return MessageBroadcastUserCreateSerializer
+
+        return BroadcastGroupSerializer
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
@@ -50,7 +48,7 @@ class BroadcastViewSet(ModelViewSet):
 
         return Response({"message": "Broadcast Group created"}, status=status.HTTP_201_CREATED)
 
-    @action(detail=False, methods=["post"], url_path=r"message", permission_classes=[IsOwnerOrManager])
+    @action(detail=False, methods=["post"], url_path=r"message")
     @transaction.atomic
     def message_broadcast(self, request):
         serializer = self.get_serializer(data=request.data)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from apps.cost_month.models import MonthlyFinancialSummary
-from apps.cost_category.models import MonthlyCostCategory
+from apps.cost.models import MonthlyFinancialSummary
+from apps.cost.models import MonthlyCostCategory
 
 class CostCategoryBreakdownSerializer(serializers.ModelSerializer):
     category_name= serializers.CharField(source='cost_category.name',read_only=True)

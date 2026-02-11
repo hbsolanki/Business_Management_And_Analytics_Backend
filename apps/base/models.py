@@ -1,5 +1,5 @@
 from django.db import models
-from apps.core.active_manager import ActiveManager
+from apps.base.utils.active_manager import ActiveManager
 from django.conf import settings
 
 

@@ -8,8 +8,7 @@ from drf_spectacular.utils import extend_schema
 from apps.subscription.serializers import plan,subsription
 from datetime import timedelta
 from django.utils import timezone
-
-from apps.user.permission import IsOwnerOrManager
+from apps.base.permission.model_permissions import ModelPermissions
 
 
 class SubscriptionPlanViewSet(GenericViewSet):
@@ -31,7 +30,7 @@ class SubscriptionPlanViewSet(GenericViewSet):
         if self.action == "plans_details":
             return [AllowAny()]
         if self.action in ["plan_purchase", "purchased_plan"]:
-            return [IsOwnerOrManager()]
+            return [ModelPermissions()]
         return super().get_permissions()
 
     @extend_schema(summary="Plan Details")
@@ -83,7 +82,7 @@ class SubscriptionPlanViewSet(GenericViewSet):
         return Response({"message": "Plan activated successfully","plan": plan.name,"valid_till": end_date,}, status=status.HTTP_200_OK )
 
     @extend_schema(summary="Purchased Plan")
-    @action(detail=False, methods=['get'],url_path="plan/purchased",permission_classes=[IsOwnerOrManager])
+    @action(detail=False, methods=['get'],url_path="plan/purchased")
     def purchased_plan(self,request):
         data=Subscription.objects.filter(business=request.user.business).first()
         if not data:
@@ -93,7 +92,7 @@ class SubscriptionPlanViewSet(GenericViewSet):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     @extend_schema(summary="Plan Usage")
-    @action(detail=True, methods=['get'], url_path="usage", permission_classes=[IsOwnerOrManager])
+    @action(detail=True, methods=['get'], url_path="usage")
     def plan_usage(self, request,pk):
         try:
             subscription=Subscription.objects.get(id=pk ,business=request.user.business)

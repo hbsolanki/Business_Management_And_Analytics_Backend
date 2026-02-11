@@ -1,14 +1,13 @@
 
 from celery import shared_task
 import base64
-from apps.invoice.utils import generate_invoice_pdf
-from apps.core.tasks import send_email_task
+from apps.invoice.utils.invoice_pdf import generate_invoice_pdf
+from apps.base.tasks.email_send import send_email_task
 from apps.invoice.models import Invoice
 
 
 @shared_task
 def send_invoice_email(*, to_email: str, invoice_id: int):
-
     invoice = Invoice.objects.get(id=invoice_id)
     pdf_bytes = generate_invoice_pdf(invoice)
     encoded_pdf = base64.b64encode(pdf_bytes).decode()

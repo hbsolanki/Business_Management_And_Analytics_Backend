@@ -1,4 +1,4 @@
-from rest_framework.permissions import IsAuthenticated
+from apps.base.permission.model_permissions import ModelPermissions
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
@@ -7,7 +7,7 @@ from apps.notification.models import Notification
 from apps.notification.serializers import NotificationReadSerializer, NotificationBulkReadSerializer
 
 class NotificationViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [ModelPermissions]
     serializer_class = NotificationReadSerializer
     http_method_names = ['post','get','delete']
 
